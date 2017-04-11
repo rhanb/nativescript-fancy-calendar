@@ -19,7 +19,7 @@ NativeScript plugin for [FSCalendar](https://github.com/WenchaoD/FSCalendar).
 - [ ] Hide/Show top and bottom border
 - [x] Callback when a date is selected
 - [ ] Callback when Week/Month change (depending of the display mode)
-- [ ] !!! Implement [Android calendar](https://github.com/SundeepK/CompactCalendarView)
+- [ ] !!! Implement [Android calendar](https://github.com/SundeepK/CompactCalendarView) or [this one](https://github.com/prolificinteractive/material-calendarview)
 
 
 
