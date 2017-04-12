@@ -5,6 +5,20 @@ export declare enum SELECTION_MODE {
     "MULTIPLE" = 2,
     "RANGE" = 3,
 }
+export declare enum SCROLL_ORIENTATION {
+    "VERTICAL" = 0,
+    "HORIZONTAL" = 1,
+}
+export declare enum DISPLAY_MODE {
+    "WEEK",
+    "MONTH",
+}
+export declare class EventDecorator {
+    private color;
+    private dates;
+    private _owner;
+    constructor(color: string, date: Array<any>, owner: any);
+}
 export declare class Calendar extends View {
     private _android;
     private _selectedDateListenerNative;
@@ -14,6 +28,9 @@ export declare class Calendar extends View {
     private _arrowColor;
     private _selectionColor;
     private _selectionMode;
+    private _displayMode;
+    private _eventDecorator;
+    private _events;
     readonly android: any;
     readonly _nativeView: any;
     _createUI(): void;
@@ -22,4 +39,11 @@ export declare class Calendar extends View {
     arrowColor: string;
     selectionColor: string;
     selectionMode: SELECTION_MODE;
+    displayMode: DISPLAY_MODE;
+    events: Array<any>;
+    private addDecorator();
+    shouldDecorate(day: any): boolean;
+    decorate(view: any): void;
+    dateHasEvent(date: any): boolean;
+    private isSameDate(dateOne, dateTwo);
 }
