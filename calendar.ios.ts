@@ -8,7 +8,7 @@ declare const FSCalendar,
     FSCalendarScopeMonth,
     FSCalendarDelegate,
     FSCalendarDataSource
-    CGRectMake;
+CGRectMake;
 
 export enum SCROLL_ORIENTATION {
     "VERTICAL" = FSCalendarScrollDirectionVertical,
@@ -28,6 +28,58 @@ export interface Appearance {
     borderRadius: number
 }
 
+export class CalendarEvent {
+    private _date: any;
+    private _source: string;
+
+    constructor(eventDate: any, eventSource?: string) {
+        this._date = eventDate;
+        if (eventSource) {
+            this._source = eventSource;
+        }
+    }
+
+    public get date(): any {
+        return this._date;
+    }
+
+    public set date(eventDate: any) {
+        this._date = eventDate;
+    }
+
+    public get source(): string {
+        return this._source;
+    }
+
+    public set source(eventSource: string) {
+        this._source = eventSource;
+    }
+}
+
+export class CalendarSubtitle {
+    private _date: any;
+    private _text: string
+    constructor(subtitleDate: any, subtitleText: string) {
+        this._date = subtitleDate;
+        this._text = subtitleText;
+    }
+
+    public get date() {
+        return this._date;
+    }
+
+    public set date(subtitleDate: any) {
+        this._date = subtitleDate;
+    }
+
+    public get text(): string {
+        return this._text;
+    }
+
+    public set text(subtitleText: string) {
+        this._text = subtitleText;
+    }
+}
 class CalendarDelegate extends NSObject {
     public static ObjCProtocols = [FSCalendarDelegate];
     private _owner: WeakRef<Calendar>;
@@ -37,9 +89,22 @@ class CalendarDelegate extends NSObject {
         delegate._owner = owner;
         return delegate;
     }
-    public calendarDidSelectDate(calendar, date: NSDate){
+    public calendarDidSelectDate(calendar, date: any) {
         console.log('calendarDidSelectDate');
         this._owner.get().dateSelected(date);
+    }
+    public calendarCurrentPageDidChange(calendar) {
+        this._owner.get().pageChanged();
+    }
+
+    public calendarBoundingRectWillChange(calendar, bounds, animated) {
+        console.log('calendarBoundingWillChange');
+        this._owner.get().ios.frame = CGRectMake(calendar.frame.origin.x, calendar.frame.origin.y, bounds.size.width, bounds.size.height);
+    }
+
+    public calendarCurrentScopeWillChangeAnimated (calendar, animated: boolean): void {
+        console.log(animated);
+        console.log('calendarCurrentScopeWillChangeAnimated')
     }
 }
 
@@ -52,10 +117,23 @@ class CalendarDataSource extends NSObject {
         source._owner = owner;
         return source;
     }
-    public calendarHasEventForDate(calendar, date: NSDate): boolean {
-        console.log("calendarHasEventForDate");
-        this._owner.get().dateHasEvent(date);
-        return true;
+    public calendarHasEventForDate(calendar, date: any): boolean {
+        return this._owner.get().dateHasEvent(date);
+    }
+
+    public calendarSubtitleForDate(calendar, date: any): string {
+        return this._owner.get().dateHasSubtitle(date);
+    }
+
+    public calendarImageForDate(calendar, date: any): string {
+        return this._owner.get().dateHasEventImage(date);
+    }
+    public calendarMinimumDateForCalendar(calendar, date: any): any {
+        return this._owner.get().minimumDate;
+    }
+
+    public calendarMaxDateForCalendar(calendar, date: any): any {
+        return this._owner.get().maximumDate;
     }
 
 }
@@ -67,6 +145,11 @@ export class Calendar extends View {
     private _allowsMultipleSelection: boolean;
     private _firstWeekday: number;
     private _appearance: Appearance;
+    private _events: Array<CalendarEvent>;
+    private _subtitles: Array<CalendarSubtitle>;
+    private _hasBorder: boolean;
+    private _maximumDate: Date;
+    private _minimumDate: Date;
 
     constructor() {
         super();
@@ -77,6 +160,7 @@ export class Calendar extends View {
         this._displayMode = DISPLAY_MODE.MONTH;
         this._allowsMultipleSelection = false;
         this._firstWeekday = 1
+        this._hasBorder = true;
         this._appearance = <Appearance>{
             weekdayTextColor: "",
             headerTitleColor: "",
@@ -137,6 +221,7 @@ export class Calendar extends View {
     public set firstWeekday(firstWeekDayValue: number) {
         if (this._firstWeekday !== firstWeekDayValue) {
             this._firstWeekday = firstWeekDayValue <= 7 && this._firstWeekday > 0 ? 1 : firstWeekDayValue;
+            console.log(this._firstWeekday);
             this._ios.firstWeekday = this._firstWeekday;
         }
 
@@ -198,7 +283,24 @@ export class Calendar extends View {
     private set borderRadiusSelectedDay(borderRadiusValue: number) {
         if (this._appearance.borderRadius !== borderRadiusValue) {
             this._appearance.borderRadius = borderRadiusValue;
+            console.log(this._appearance.borderRadius);
             this._ios.appearance.borderRadius = this._appearance.borderRadius;
+        }
+    }
+
+    public set events(calendarEvents: Array<CalendarEvent>) {
+        if (this._events !== calendarEvents) {
+            this._events = calendarEvents;
+        }
+    }
+
+    public get events(): Array<CalendarEvent> {
+        return this._events;
+    }
+
+    public set subtitles(calendarSubtitles: Array<CalendarSubtitle>) {
+        if (this._subtitles !== calendarSubtitles) {
+            this._subtitles = calendarSubtitles;
         }
     }
 
@@ -207,8 +309,74 @@ export class Calendar extends View {
         console.dir(date);
     }
 
-    public dateHasEvent(date) {
-        console.log('dateHasEvent');
+    public pageChanged() {
+        console.log('page changed');
+    }
+
+    public dateHasEvent(date): boolean {
+        let i = 0, found = false;
+        while (!found && i < this._events.length) {
+            if (this.isSameDate(date, this._events[i].date) && !this._events[i].source) {
+                found = true;
+            }
+            i++;
+        }
+        return found;
+    }
+    public dateHasEventImage(date): string {
+        let i = 0, found = undefined;
+        while (!found && i < this._events.length) {
+            if (this.isSameDate(date, this._events[i].date) && this._events[i].source) {
+                found = this._events[i].source;
+            }
+            i++;
+        }
+        return found;
+    }
+
+    public dateHasSubtitle(date): string {
+        let i = 0, found = undefined;
+        while (!found && i < this._subtitles.length) {
+            if (this.isSameDate(date, this._subtitles[i].date)) {
+                found = this._subtitles[i].text;
+            }
+            i++;
+        }
+        return found;
+    }
+
+    private isSameDate(dateOne, dateTwo) {
+        return dateOne.getMonth() === dateTwo.getMonth() && dateOne.getDay() === dateTwo.getDay() && dateOne.getYear() === dateTwo.getYear() && dateOne.getDate() === dateTwo.getDate();
+    }
+
+    public get hasBorder(): boolean {
+        return this._hasBorder;
+    }
+
+    public set hasBorder(calendarHasBorder: boolean) {
+        if (this._hasBorder !== calendarHasBorder) {
+            this._ios.clipsToBounds = this._hasBorder;
+        }
+    }
+
+    public get maximumDate(): Date {
+        return this._maximumDate;
+    }
+
+    public set maximumDate(calendarMaxDate: Date) {
+        if (this._maximumDate !== calendarMaxDate) {
+            this._maximumDate = calendarMaxDate;
+        }
+    }
+
+    public get minimumDate(): Date {
+        return this._minimumDate
+    }
+
+    public set minimumDate(calendarMinDate: Date) {
+        if (this._minimumDate !== calendarMinDate) {
+            this._minimumDate = calendarMinDate;
+        }
     }
 
     onLoaded() {

@@ -1,15 +1,23 @@
 {
-  "name": "nativescript-calendar",
+  "name": "nativescript-fancy-calendar",
   "version": "0.0.1",
   "main": "calendar",
   "typings": "index.d.ts",
   "nativescript": {
     "platforms": {
-      "ios": "2.5.0"
+      "ios": "2.5.0",
+      "android": "2.5.0"
     }
   },
   "scripts": {
-    "build": "tsc calendar.ios.ts --types tns-platform-declarations/ios --lib es2016 -d true"
+    "build": "tsc",
+    "demo.ios": "npm run preparedemo && cd demo && tns run ios --emulator",
+    "demo.ios.device": "npm run preparedemo && cd demo && tns run ios",
+    "demo.android": "npm run preparedemo && cd demo && tns run android --emulator",
+    "test.ios": "cd demo && tns test ios --emulator",
+    "test.ios.device": "cd demo && tns test ios",
+    "test.android": "cd demo && tns test android",
+    "preparedemo": "npm run build && cd demo && tns plugin remove nativescript-fancy-calendar && tns plugin add .. && tns install"
   },
   "devDependencies": {
     "tns-core-modules": "^2.5.2",

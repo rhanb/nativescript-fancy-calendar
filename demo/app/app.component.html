@@ -1,0 +1,8 @@
+<GridLayout rows="auto, *">
+    <GridLayout columns="auto, auto" row="0">
+        <Button row="0" col="0"(tap)="changeOrientation()" text="changeOrientation"></Button>
+        <Button row="0" col="1" (tap)="changeDisplayMode()" text="changeDisplayMode"></Button>
+    </GridLayout>
+    <Calendar height="100%" row="1" (loaded)="calendarLoaded($event)">
+    </Calendar>
+</GridLayout>

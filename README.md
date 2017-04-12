@@ -14,8 +14,9 @@ NativeScript plugin for [FSCalendar](https://github.com/WenchaoD/FSCalendar).
 - [ ] Change the first day of the week (sunday by default)
 - [x] Styling
 - [ ] Change selection shape
-- [ ] Subtitle
-- [ ] Dote/Image under day
+- [x] Subtitle
+- [x] Dote under day
+- [] Image under day
 - [ ] Hide/Show top and bottom border
 - [x] Callback when a date is selected
 - [ ] Callback when Week/Month change (depending of the display mode)
