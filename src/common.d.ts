@@ -1,15 +1,7 @@
 import { View } from "ui/core/view";
 export declare enum SELECTION_MODE {
-    "SINGLE",
-    "MULTIPLE"
-}
-export declare enum DISPLAY_MODE {
-    "WEEK",
-    "MONTH"
-}
-export enum SCROLL_ORIENTATION {
-    "VERTICAL",
-    "HORIZONTAL"
+    "SINGLE" = 1,
+    "MULTIPLE" = 2,
 }
 export interface Appearance {
     weekdayTextColor: string;
@@ -63,20 +55,4 @@ export declare class CalendarCommon extends View {
     getTodaySelectionColor(): string;
     setBorderRadiusSelectedDay(borderRadiusValue: number): void;
     getBorderRadiusSelectedDay(): number;
-}
-export declare class Calendar extends CalendarCommon {
-    constructor();
-    displayMode: any;
-    selectionMode: SELECTION_MODE;
-    events: Array<any>;
-    dateSelected(date: any): void;
-    pageChanged(): void;
-    dateHasEvent(date: any): boolean;
-    dateHasEventImage(date: any): string;
-    dateHasSubtitle(date: any): string;
-    private isSameDate(dateOne, dateTwo);
-    hasBorder: boolean;
-    maximumDate: Date;
-    minimumDate: Date;
-    onLoaded(): void;
 }
