@@ -12,6 +12,11 @@ export interface Appearance {
     todaySelectionColor: string;
     borderRadius: number;
 }
+export interface INSEvents {
+    dateSelected: string;
+    monthChanged: string;
+}
+export declare const NSEvents: INSEvents;
 export declare class CalendarEvent {
     private _date;
     private _source;

@@ -1,8 +1,8 @@
 import { View } from 'ui/core/view';
 import { Color } from "color";
-import { CalendarEvent, CalendarCommon, SELECTION_MODE, Appearance } from "../common";
+import { CalendarEvent, CalendarCommon, SELECTION_MODE, Appearance, NSEvents } from "../common";
 
-declare const com;
+declare const com, ColorDrawable;
 const MaterialCalendar = com.prolificinteractive.materialcalendarview,
     MaterialCalendarView = MaterialCalendar.MaterialCalendarView,
     MaterialCalendarOnDateSelectedListener = MaterialCalendar.OnDateSelectedListener,
@@ -14,8 +14,8 @@ const MaterialCalendar = com.prolificinteractive.materialcalendarview,
 
 
 export enum SCROLL_ORIENTATION {
-    "VERTICAL" = 0,
-    "HORIZONTAL" = 1
+    "VERTICAL" = MaterialCalendarView.VERTICAL,
+    "HORIZONTAL" = MaterialCalendarView.HORIZONTAL
 }
 
 export enum DISPLAY_MODE {
@@ -31,6 +31,7 @@ export class Calendar extends CalendarCommon {
     private _selectedMonthListenerNative: any;
     private _selectedMonthListener: any;
     private _arrowColor: string;
+    private _scrollOrientation: SCROLL_ORIENTATION;
     private _selectionColor: string;
 
 
@@ -44,6 +45,8 @@ export class Calendar extends CalendarCommon {
 
     public _createUI() {
         this._android = new MaterialCalendarView(this._context);
+        this.setSelectedMonthListener();
+        this.setSelectedDateListener();
         super.setAppearance(<Appearance>{});
         this.appearance = <Appearance>{
             weekdayTextColor: "",
@@ -56,30 +59,50 @@ export class Calendar extends CalendarCommon {
         }
     }
 
+    public get scrollOrientation():SCROLL_ORIENTATION {
+        return this._scrollOrientation
+    }
+
+    public set scrollOrientation(calendarScrollOrientation: SCROLL_ORIENTATION) {
+        if (this._scrollOrientation !== calendarScrollOrientation) {
+            this._scrollOrientation = calendarScrollOrientation;
+            this._android.setTitleAnimationOrientation(this._scrollOrientation);
+        }
+    }
     public get selectedDateListener(): any {
         return this._selectedDateListener;
     }
 
-    public set selectedDateListener(calendarSelectedDateListener: any) {
+    public setSelectedDateListener() {
         let _that = this;
-        this._selectedDateListener = calendarSelectedDateListener;
-        this._selectedDateListenerNative = new MaterialCalendarOnDateSelectedListener({
-            onDateSelected: _that._selectedDateListener
+        let selectedDateListener = new MaterialCalendarOnDateSelectedListener({
+            onDateSelected: function (widget, date, selected) {
+                _that.notify({
+                    eventName: NSEvents.dateSelected,
+                    object: _that,
+                    data: { date: date, selected: selected }
+                });
+            }
         });
-        this._android.setOnDateChangedListener(this._selectedDateListenerNative);
+        this._android.setOnDateChangedListener(selectedDateListener);
     }
 
     public get selectedMonthListener(): any {
         return this._selectedMonthListener;
     }
 
-    public set selectedMonthListener(calendarSelectedMontheListener: any) {
+    public setSelectedMonthListener() {
         let _that = this;
-        this._selectedMonthListener = calendarSelectedMontheListener;
-        this._selectedMonthListenerNative = new MaterialCalendarOnMonthChangedListener({
-            onMonthChanged: _that._selectedMonthListener
+        let selectedMonthListenerNative = new MaterialCalendarOnMonthChangedListener({
+            onMonthChanged: function (widget, date) {
+                _that.notify({
+                    eventName: NSEvents.monthChanged,
+                    object: _that,
+                    data: date
+                });
+            }
         });
-        this._android.setOnMonthChangedListener(this._selectedMonthListenerNative);
+        this._android.setOnMonthChangedListener(selectedMonthListenerNative);
     }
 
     public get arrowColor(): string {
@@ -89,7 +112,9 @@ export class Calendar extends CalendarCommon {
     public set arrowColor(calendarArrowColor: string) {
         if (this._arrowColor !== calendarArrowColor) {
             this._arrowColor = calendarArrowColor;
-            this._android.setArrowColor(new Color(this._arrowColor).android);
+            if (this._arrowColor !== "") {
+                this._android.setArrowColor(new Color(this._arrowColor).android);
+            }
         }
     }
 
@@ -119,6 +144,12 @@ export class Calendar extends CalendarCommon {
     private set headerTitleColor(colorValue: string) {
         if (super.getHeaderTitleColor() !== colorValue) {
             super.setHeaderTitleColor(colorValue);
+            if (colorValue !== "") {
+                this._android.setArrowColor(new Color(colorValue).android);
+                //this._android.setHeaderTextAppearance(new android.text.style)
+                //android.graphics.drawable
+                //setHeaderTextAppearance
+            }
             //this._android.setHeaderTextAppearance(new Color(super.getHeaderTitleColor()).android);
         }
     }
@@ -126,9 +157,9 @@ export class Calendar extends CalendarCommon {
         if (super.getEventColor() !== colorValue) {
             super.setEventColor(colorValue);
             this._android.removeDecorators();
-            this.addDecorator();
+            this.addDecoratorDot();
             //this.ios.appearance.eventColor = new Color(super.getEventColor()).android;
-        }
+        }//android.view.View.generateViewId()
     }
     private set selectionColor(colorValue: string) {
         if (super.getSelectionColor() !== colorValue) {
@@ -141,12 +172,14 @@ export class Calendar extends CalendarCommon {
     private set todayColor(colorValue: string) {
         if (super.getTodayColor() !== colorValue) {
             super.setTodayColor(colorValue);
+            this.addDecoratorToday(new Date());
             //this._ios.appearance.todayColor = new Color(this.appearance.todayColor).ios;
         }
     }
     private set todaySelectionColor(colorValue: string) {
         if (super.getTodaySelectionColor() !== colorValue) {
             super.setTodaySelectionColor(colorValue);
+            //<this._android.setSelectedDate(new Date());
             //this._ios.appearance.todaySelectionColor = new Color(this.appearance.todaySelectionColor).ios;
         }
     }
@@ -180,7 +213,7 @@ export class Calendar extends CalendarCommon {
                 this._android.removeDecorators();
             }
             super.setEvents(calendarEvents);
-            this.addDecorator();
+            this.addDecoratorDot();
         }
     }
 
@@ -212,7 +245,32 @@ export class Calendar extends CalendarCommon {
         }
     }
 
-    private addDecorator() {
+    private addDecoratorToday(date: Date) {
+        let _that = this;
+        this._android.addDecorator(new MaterialCalendarDecorator({
+            shouldDecorate: (day: any) => {
+                let should = false;
+                if (this.isSameDate(date, day)) {
+                    should = true;
+                }
+                console.log(should);
+                return should;
+            },
+            decorate: (view) => {
+                let newColor;
+                if (super.getTodayColor() === "") {
+                    newColor = new Color("red").android;
+                } else {
+                    newColor = new Color(super.getTodayColor()).android;
+                }
+                console.log('decorate');
+                let highlightDrawable = new android.graphics.drawable.ColorDrawable(newColor);
+                view.setBackgroundDrawable(highlightDrawable);                
+            }
+        }));
+    }
+
+    private addDecoratorDot() {
         let _that = this;
         this._android.addDecorator(
             new MaterialCalendarDecorator({

@@ -2,6 +2,8 @@ import { Component } from "@angular/core";
 import { Calendar, SELECTION_MODE, DISPLAY_MODE, CalendarEvent, Appearance } from 'nativescript-fancy-calendar';
 
 import { registerElement } from 'nativescript-angular';
+import { Color } from "color";
+import { SCROLL_ORIENTATION } from "nativescript-fancy-calendar";
 
 declare const NSDate;
 
@@ -13,60 +15,29 @@ registerElement('Calendar', () => Calendar);
 export class AppComponent {
     private displayMode: DISPLAY_MODE;
     private _calendar: Calendar;
-    //private orientation: SCROLL_ORIENTATION;
+    private scrollOrientation: SCROLL_ORIENTATION;
 
-    constructor() {
-        //this.orientation = SCROLL_ORIENTATION.HORIZONTAL;
-    }
     public calendarLoaded(event) {
         console.log('calendar loaded');
         this._calendar = <Calendar>event.object;
-        //this._calendar.selectionColor = "green";
-        //this._calendar.arrowColor = "pink"*/
         this._calendar.selectionMode = SELECTION_MODE.MULTIPLE;
-        //this._calendar.displayMode = DISPLAY_MODE.WEEK;
-        //console.dir(this._calendar.selectionMode);
         this._calendar.events = new Array(new CalendarEvent(new Date()));
         this._calendar.appearance = <Appearance>{
-             weekdayTextColor: "green",
-             headerTitleColor: "green",
-             eventColor: "pink",
-             selectionColor: "black",
-             todayColor: "yellow",
-             todaySelectionColor: "yellow",
-             borderRadius: 0
-         };
+            weekdayTextColor: "white",
+            headerTitleColor: "white",
+            eventColor: "#F78200",
+            selectionColor: "black",
+            todayColor: "#FF8000",
+            todaySelectionColor: "white",
+            borderRadius: 25
+        };
         let _that = this;
-        /*setTimeout(function () {
-            _that._calendar.events = new Array();
-            setTimeout(function () {
-                var tommorow = new Date();
-                tommorow.setDate(tommorow.getDate() + 1);
-                _that._calendar.events = new Array(new CalendarEvent(new Date()), new CalendarEvent(tommorow));
-            }, 2000)
-        }, 2000);*/
-        /*
-                this._calendar.subtitles = [
-                    new CalendarSubtitle(new Date(), "test"),
-                ];
-                this._calendar.firstWeekday = 4;
-                this._calendar.allowMultipleSelection = true;
-                this._calendar.appearance = <Appearance>{
-                    weekdayTextColor: "yellow",
-                    headerTitleColor: "blue",
-                    eventColor: "green",
-                    selectionColor: "red",
-                    todayColor: "brown",
-                    todaySelectionColor: "white",
-                    borderRadius: 20
-                }*/
+        this._calendar.hasBorder = false;
+        setTimeout(function () {
+            _that._calendar.reload();
+        }, 3000);
+        //this._calendar.ios().setTitleDefaultColor(new Color("white").ios);
     }
-
-    /*public changeOrientation() {
-        let newOrientation: SCROLL_ORIENTATION;
-        this.orientation = this.orientation === SCROLL_ORIENTATION.HORIZONTAL ? SCROLL_ORIENTATION.VERTICAL : SCROLL_ORIENTATION.HORIZONTAL;
-        this._calendar.scrollOrientation = this.orientation;
-    }*/
 
     public changeDisplayMode() {
         let newDisplayMode: DISPLAY_MODE;
@@ -74,12 +45,19 @@ export class AppComponent {
         this._calendar.displayMode = this.displayMode;
     }
 
-    public monthListener(event) {
-        console.dir(event);
+    public changeOrientation() {
+        let newOrientation: SCROLL_ORIENTATION;
+        this.scrollOrientation = this.scrollOrientation === SCROLL_ORIENTATION.HORIZONTAL ? SCROLL_ORIENTATION.VERTICAL : SCROLL_ORIENTATION.HORIZONTAL;
+        this._calendar.scrollOrientation = this.scrollOrientation;
     }
 
-    public dateListener(event) {
-        console.dir(event);
+
+    public dateSelected(event) {
+        console.dir(event.data.date);
+    }
+
+    public monthChanged(event) {
+        console.dir(event.data);
     }
 }
 

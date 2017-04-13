@@ -1,11 +1,11 @@
 import { View } from "ui/core/view";
 export declare enum SELECTION_MODE {
-    "SINGLE",
-    "MULTIPLE"
+    "SINGLE" = 1,
+    "MULTIPLE" = 2,
 }
 export declare enum DISPLAY_MODE {
     "WEEK",
-    "MONTH"
+    "MONTH",
 }
 export enum SCROLL_ORIENTATION {
     "VERTICAL",
@@ -20,6 +20,11 @@ export interface Appearance {
     todaySelectionColor: string;
     borderRadius: number;
 }
+export interface INSEvents {
+    dateSelected: string;
+    monthChanged: string;
+}
+export declare const NSEvents: INSEvents;
 export declare class CalendarEvent {
     private _date;
     private _source;
@@ -64,6 +69,14 @@ export declare class CalendarCommon extends View {
     setBorderRadiusSelectedDay(borderRadiusValue: number): void;
     getBorderRadiusSelectedDay(): number;
 }
+
+export declare class CalendarSubtitle {
+    private _date;
+    private _text;
+    constructor(subtitleDate: any, subtitleText: string);
+    date: any;
+    text: string;
+}
 export declare class Calendar extends CalendarCommon {
     constructor();
     displayMode: any;
@@ -76,8 +89,12 @@ export declare class Calendar extends CalendarCommon {
     dateHasEventImage(date: any): string;
     dateHasSubtitle(date: any): string;
     private isSameDate(dateOne, dateTwo);
+    subtitles: Array<CalendarSubtitle>;
     hasBorder: boolean;
     maximumDate: Date;
     minimumDate: Date;
     onLoaded(): void;
+    firstWeekday: number;
+    reload(): void;
+    scrollOrientation: SCROLL_ORIENTATION;
 }

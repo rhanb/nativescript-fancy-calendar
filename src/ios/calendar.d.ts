@@ -36,8 +36,8 @@ export declare class Calendar extends CalendarCommon {
     private borderRadiusSelectedDay;
     events: Array<CalendarEvent>;
     subtitles: Array<CalendarSubtitle>;
-    dateSelected(date: any): void;
-    pageChanged(): void;
+    dateSelectedEvent(date: any): void;
+    pageChanged(calendar: any): void;
     dateHasEvent(date: any): boolean;
     dateHasEventImage(date: any): string;
     dateHasSubtitle(date: any): string;
@@ -45,5 +45,6 @@ export declare class Calendar extends CalendarCommon {
     hasBorder: boolean;
     maximumDate: Date;
     minimumDate: Date;
+    reload(): void;
     onLoaded(): void;
 }

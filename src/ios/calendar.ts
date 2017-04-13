@@ -1,6 +1,6 @@
 import { View } from 'ui/core/view';
 import { Color } from "color";
-import { CalendarEvent, CalendarCommon, SELECTION_MODE, Appearance } from "../common";
+import { CalendarEvent, CalendarCommon, SELECTION_MODE, Appearance, NSEvents } from "../common";
 
 declare const FSCalendar,
     FSCalendarScrollDirectionVertical,
@@ -55,19 +55,24 @@ class CalendarDelegate extends NSObject {
         delegate._owner = owner;
         return delegate;
     }
-    public calendarDidSelectDate(calendar, date: any) {
-        this._owner.get().dateSelected(date);
+    public calendarDidSelectDate(date: NSDate) {
+        console.log('clandarDidSelectData');
+        this._owner.get().dateSelectedEvent(date);
     }
     public calendarCurrentPageDidChange(calendar) {
-        this._owner.get().pageChanged();
+        console.log('calendarPageDidChange');
+        this._owner.get().pageChanged(calendar);
     }
 
-    public calendarBoundingRectWillChange(calendar, bounds, animated) {
-        this._owner.get().ios.frame = CGRectMake(calendar.frame.origin.x, calendar.frame.origin.y, bounds.size.width, bounds.size.height);
+    public calendarBoundingRectWillChange(bounds, animated) {
+        console.log('calendarBoundingRectWhillChange');
+        let frame = this._owner.get().ios.frame;
+        this._owner.get().ios.frame = CGRectMake(frame.origin.x, frame.origin.y, bounds.size.width, bounds.size.height);
     }
 
-    public calendarCurrentScopeWillChangeAnimated(calendar, animated: boolean): void {
-    }
+    /*public calendarCurrentScopeWillChangeAnimated(calendar, animated: boolean): void {
+        console.log('calendarBoundingRectWhillChangeAnimated');
+    }*/
 }
 
 class CalendarDataSource extends NSObject {
@@ -79,22 +84,22 @@ class CalendarDataSource extends NSObject {
         source._owner = owner;
         return source;
     }
-    public calendarHasEventForDate(calendar, date: any): boolean {
+    public calendarHasEventForDate(calendar, date: NSDate): boolean {
         return this._owner.get().dateHasEvent(date);
     }
 
-    public calendarSubtitleForDate(calendar, date: any): string {
+    public calendarSubtitleForDate(calendar, date: NSDate): string {
         return this._owner.get().dateHasSubtitle(date);
     }
 
-    public calendarImageForDate(calendar, date: any): string {
+    public calendarImageForDate(calendar, date: NSDate): string {
         return this._owner.get().dateHasEventImage(date);
     }
-    public calendarMinimumDateForCalendar(calendar, date: any): any {
+    public calendarMinimumDateForCalendar(calendar, date: NSDate): any {
         return this._owner.get().minimumDate;
     }
 
-    public calendarMaxDateForCalendar(calendar, date: any): any {
+    public calendarMaxDateForCalendar(calendar, date: NSDate): any {
         return this._owner.get().maximumDate;
     }
 
@@ -247,10 +252,22 @@ export class Calendar extends CalendarCommon {
         }
     }
 
-    public dateSelected(date) {
+    public dateSelectedEvent(date) {
+        console.log('dateSelected');
+        this.notify({
+            eventName: NSEvents.dateSelected,
+            object: this,
+            data: date
+        })
     }
 
-    public pageChanged() {
+    public pageChanged(calendar) {
+        console.log('pageChanged');
+        this.notify({
+            eventName: NSEvents.monthChanged,
+            object: this,
+            data: calendar
+        })
     }
 
     public dateHasEvent(date): boolean {
@@ -312,6 +329,10 @@ export class Calendar extends CalendarCommon {
         if (this.minimumDate !== calendarMinDate) {
             super.setMinimumDate(calendarMinDate);
         }
+    }
+
+    public reload() {
+        this._ios.reloadData();
     }
 
     onLoaded() {

@@ -1,7 +1,7 @@
 import { CalendarEvent, CalendarCommon, SELECTION_MODE, Appearance } from "../common";
 export declare enum SCROLL_ORIENTATION {
-    "VERTICAL" = 0,
-    "HORIZONTAL" = 1,
+    "VERTICAL",
+    "HORIZONTAL",
 }
 export declare enum DISPLAY_MODE {
     "WEEK",
@@ -14,12 +14,16 @@ export declare class Calendar extends CalendarCommon {
     private _selectedMonthListenerNative;
     private _selectedMonthListener;
     private _arrowColor;
+    private _scrollOrientation;
     private _selectionColor;
     readonly android: any;
     readonly _nativeView: any;
     _createUI(): void;
-    selectedDateListener: any;
-    selectedMonthListener: any;
+    scrollOrientation: SCROLL_ORIENTATION;
+    readonly selectedDateListener: any;
+    setSelectedDateListener(): void;
+    readonly selectedMonthListener: any;
+    setSelectedMonthListener(): void;
     arrowColor: string;
     appearance: Appearance;
     private weekdayTextColor;
@@ -35,7 +39,8 @@ export declare class Calendar extends CalendarCommon {
     firstWeekday: number;
     maximumDate: Date;
     minimumDate: Date;
-    private addDecorator();
+    private addDecoratorToday(date);
+    private addDecoratorDot();
     dateHasEvent(date: any): boolean;
     private isSameDate(dateOne, dateTwo);
 }
