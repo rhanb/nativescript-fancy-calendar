@@ -3,24 +3,21 @@
 
 ## NativeScript Fancy Calendar
 
-NativeScript plugin for [FSCalendar](https://github.com/WenchaoD/FSCalendar).
+NativeScript plugin for [iOS](https://github.com/WenchaoD/FSCalendar) and [Android](https://github.com/prolificinteractive/material-calendarview).
+
+
+### Screenshots
+
+
+  iOS    |  Android
+-------- | ---------
+![iOS](screenshots/sample_ios.png) | ![Android](screenshots/sample_android.png)
+
 
 ### TODO
 
-- [x] scrollDirection
-- [x] Week/Month mode
 - [ ] Week/Month mode with animation
-- [x] Select more than one date at a time
-- [ ] Change the first day of the week (sunday by default)
-- [x] Styling
-- [ ] Change selection shape
-- [x] Subtitle
-- [x] Dote under day
-- [] Image under day
 - [ ] Hide/Show top and bottom border
-- [x] Callback when a date is selected
-- [ ] Callback when Week/Month change (depending of the display mode)
-- [ ] !!! Implement [Android calendar](https://github.com/SundeepK/CompactCalendarView) or [this one](https://github.com/prolificinteractive/material-calendarview)
 
 
 
