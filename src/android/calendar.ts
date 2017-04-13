@@ -44,6 +44,16 @@ export class Calendar extends CalendarCommon {
 
     public _createUI() {
         this._android = new MaterialCalendarView(this._context);
+        super.setAppearance(<Appearance>{});
+        this.appearance = <Appearance>{
+            weekdayTextColor: "",
+            headerTitleColor: "",
+            eventColor: "",
+            selectionColor: "",
+            todayColor: "",
+            todaySelectionColor: "",
+            borderRadius: 0
+        }
     }
 
     public get selectedDateListener(): any {
@@ -95,29 +105,37 @@ export class Calendar extends CalendarCommon {
         }
     }
 
+    public get appearance() {
+        return super.getAppearance();
+    }
+
     private set weekdayTextColor(colorValue: string) {
         if (super.getWeekdayTextColor() !== colorValue) {
             super.setWeekdayTextColor(colorValue);
-            this._android.setWeekDayTextAppearance(new Color(super.getWeekdayTextColor()).android);
-            this._android.setDateTextAppearance(new Color(super.getWeekdayTextColor()).android);
+            //this._android.setWeekDayTextAppearance(new Color(super.getWeekdayTextColor()).android);
+            //this._android.setDateTextAppearance(new Color(super.getWeekdayTextColor()).android);
         }
     }
     private set headerTitleColor(colorValue: string) {
         if (super.getHeaderTitleColor() !== colorValue) {
             super.setHeaderTitleColor(colorValue);
-            this._android.setHeaderTextAppearance(new Color(super.getHeaderTitleColor()).android);
+            //this._android.setHeaderTextAppearance(new Color(super.getHeaderTitleColor()).android);
         }
     }
     private set eventColor(colorValue: string) {
         if (super.getEventColor() !== colorValue) {
             super.setEventColor(colorValue);
-            this.ios.appearance.eventColor = new Color(super.getEventColor()).android;
+            this._android.removeDecorators();
+            this.addDecorator();
+            //this.ios.appearance.eventColor = new Color(super.getEventColor()).android;
         }
     }
     private set selectionColor(colorValue: string) {
         if (super.getSelectionColor() !== colorValue) {
             super.setSelectionColor(colorValue);
-            this._android.setSelectionColor(new Color(super.getSelectionColor()).android);
+            if (super.getSelectionColor() !== "") {
+                this._android.setSelectionColor(new Color(super.getSelectionColor()).android);
+            }
         }
     }
     private set todayColor(colorValue: string) {
@@ -212,7 +230,13 @@ export class Calendar extends CalendarCommon {
                     return should;
                 },
                 decorate: (view) => {
-                    view.addSpan(new MaterialCalendarDot(5, new Color(super.getEventColor()).android));
+                    let newColor;
+                    if (super.getEventColor() === "") {
+                        newColor = new Color("green").android;
+                    } else {
+                        newColor = new Color(super.getEventColor()).android;
+                    }
+                    view.addSpan(new MaterialCalendarDot(5, newColor));
                 }
             })
         );

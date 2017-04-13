@@ -69,6 +69,7 @@ export declare class Calendar extends CalendarCommon {
     displayMode: any;
     selectionMode: SELECTION_MODE;
     events: Array<any>;
+    appearance: Appearance;
     dateSelected(date: any): void;
     pageChanged(): void;
     dateHasEvent(date: any): boolean;

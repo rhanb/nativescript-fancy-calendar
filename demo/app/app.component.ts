@@ -24,22 +24,27 @@ export class AppComponent {
         //this._calendar.selectionColor = "green";
         //this._calendar.arrowColor = "pink"*/
         this._calendar.selectionMode = SELECTION_MODE.MULTIPLE;
-        this._calendar.displayMode = DISPLAY_MODE.WEEK;
+        //this._calendar.displayMode = DISPLAY_MODE.WEEK;
         //console.dir(this._calendar.selectionMode);
-        this._calendar.setAppearance(<Appearance>{
-            eventColor: "green"
-        });
         this._calendar.events = new Array(new CalendarEvent(new Date()));
+        this._calendar.appearance = <Appearance>{
+             weekdayTextColor: "green",
+             headerTitleColor: "green",
+             eventColor: "pink",
+             selectionColor: "black",
+             todayColor: "yellow",
+             todaySelectionColor: "yellow",
+             borderRadius: 0
+         };
         let _that = this;
-        this._calendar.firstWeekDay = 2;
-        setTimeout(function () {
+        /*setTimeout(function () {
             _that._calendar.events = new Array();
             setTimeout(function () {
                 var tommorow = new Date();
                 tommorow.setDate(tommorow.getDate() + 1);
                 _that._calendar.events = new Array(new CalendarEvent(new Date()), new CalendarEvent(tommorow));
             }, 2000)
-        }, 2000);
+        }, 2000);*/
         /*
                 this._calendar.subtitles = [
                     new CalendarSubtitle(new Date(), "test"),

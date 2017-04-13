@@ -56,7 +56,6 @@ class CalendarDelegate extends NSObject {
         return delegate;
     }
     public calendarDidSelectDate(calendar, date: any) {
-        console.log('calendarDidSelectDate');
         this._owner.get().dateSelected(date);
     }
     public calendarCurrentPageDidChange(calendar) {
@@ -64,13 +63,10 @@ class CalendarDelegate extends NSObject {
     }
 
     public calendarBoundingRectWillChange(calendar, bounds, animated) {
-        console.log('calendarBoundingWillChange');
         this._owner.get().ios.frame = CGRectMake(calendar.frame.origin.x, calendar.frame.origin.y, bounds.size.width, bounds.size.height);
     }
 
     public calendarCurrentScopeWillChangeAnimated(calendar, animated: boolean): void {
-        console.log(animated);
-        console.log('calendarCurrentScopeWillChangeAnimated')
     }
 }
 
@@ -115,6 +111,16 @@ export class Calendar extends CalendarCommon {
         this._ios = FSCalendar.alloc().initWithFrame(CGRectMake(0, 0, 0, 0));
         this._ios.delegate = CalendarDelegate.initWithOwner(new WeakRef(this));
         this._ios.dataSource = CalendarDataSource.initWithOwner(new WeakRef(this));
+        super.setAppearance(<Appearance>{});
+        this.appearance = <Appearance>{
+            weekdayTextColor: "",
+            headerTitleColor: "",
+            eventColor: "",
+            selectionColor: "",
+            todayColor: "",
+            todaySelectionColor: "",
+            borderRadius: 0
+        }
     }
 
     public get ios() {
@@ -181,6 +187,10 @@ export class Calendar extends CalendarCommon {
         }
     }
 
+    public get appearance() {
+        return super.getAppearance();
+    }
+
     private set weekdayTextColor(colorValue: string) {
         if (super.getWeekdayTextColor() !== colorValue) {
             super.setWeekdayTextColor(colorValue)
@@ -226,7 +236,7 @@ export class Calendar extends CalendarCommon {
     }
 
     public set events(calendarEvents: Array<CalendarEvent>) {
-        if (this.events !== calendarEvents) {
+        if (super.getEvents() !== calendarEvents) {
             super.setEvents(calendarEvents);
         }
     }
@@ -238,18 +248,15 @@ export class Calendar extends CalendarCommon {
     }
 
     public dateSelected(date) {
-        console.log('dateSelected');
-        console.dir(date);
     }
 
     public pageChanged() {
-        console.log('page changed');
     }
 
     public dateHasEvent(date): boolean {
         let i = 0, found = false;
-        while (!found && i < this.events.length) {
-            if (this.isSameDate(date, this.events[i].date) && !this.events[i].source) {
+        while (!found && i < super.getEvents().length) {
+            if (this.isSameDate(date, super.getEvents()[i].date) && !super.getEvents()[i].source) {
                 found = true;
             }
             i++;
@@ -258,9 +265,9 @@ export class Calendar extends CalendarCommon {
     }
     public dateHasEventImage(date): string {
         let i = 0, found = undefined;
-        while (!found && i < this.events.length) {
-            if (this.isSameDate(date, this.events[i].date) && this.events[i].source) {
-                found = this.events[i].source;
+        while (!found && i < super.getEvents().length) {
+            if (this.isSameDate(date, super.getEvents()[i].date) && super.getEvents()[i].source) {
+                found = super.getEvents()[i].source;
             }
             i++;
         }
@@ -282,8 +289,6 @@ export class Calendar extends CalendarCommon {
     }
 
     private isSameDate(dateOne, dateTwo) {
-        console.dir(dateOne);
-        console.dir(dateTwo);
         return dateOne.getMonth() === dateTwo.getMonth() && dateOne.getDay() === dateTwo.getDay() && dateOne.getYear() === dateTwo.getYear() && dateOne.getDate() === dateTwo.getDate();
     }
 
