@@ -1,3 +1,4 @@
+
 import { View } from "ui/core/view";
 
 export enum SELECTION_MODE {
