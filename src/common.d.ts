@@ -1,8 +1,10 @@
 import { View } from "ui/core/view";
+import { Property, PropertyChangeData } from "ui/core/dependency-observable";
 export declare enum SELECTION_MODE {
     "SINGLE" = 1,
     "MULTIPLE" = 2,
 }
+export declare const CALENDAR = "Calendar";
 export interface Appearance {
     weekdayTextColor: string;
     headerTitleColor: string;
@@ -11,6 +13,23 @@ export interface Appearance {
     todayColor: string;
     todaySelectionColor: string;
     borderRadius: number;
+    hasBorder: boolean;
+}
+export declare enum SCROLL_ORIENTATION {
+    "VERTICAL",
+    "HORIZONTAL",
+}
+export declare enum DISPLAY_MODE {
+    "WEEK",
+    "MONTH",
+}
+export interface Settings {
+    displayMode: DISPLAY_MODE;
+    selectionMode: SELECTION_MODE;
+    scrollOrientation: SCROLL_ORIENTATION;
+    firstWeekday: number;
+    minimumDate: Date;
+    maximumDate: Date;
 }
 export interface INSEvents {
     dateSelected: string;
@@ -25,39 +44,13 @@ export declare class CalendarEvent {
     source: string;
 }
 export declare class CalendarCommon extends View {
-    private _events;
-    _displayMode: any;
-    private _selectionMode;
-    private _appearance;
-    private _maximumDate;
-    private _minimumDate;
-    private _firstWeekday;
-    getDisplayMode(): any;
-    setDisplayMode(calendarDisplayMode: any): void;
-    getEvents(): any[];
-    setEvents(calendarEvents: any): void;
-    getSelectionMode(): SELECTION_MODE;
-    setSelectionMode(calendarSelectionMode: SELECTION_MODE): void;
-    getAppearance(): Appearance;
-    setAppearance(calendarAppearance: Appearance): void;
-    getMaximumDate(): Date;
-    setMaximumDate(calendarMaxDate: Date): void;
-    getMinimumDate(): Date;
-    setMinimumDate(calendarMinDate: Date): void;
-    getFirstWeekday(): number;
-    setFirstWeekDay(calendarFirstWeekDay: number): void;
-    setWeekdayTextColor(colorValue: string): void;
-    getWeekdayTextColor(): string;
-    setHeaderTitleColor(colorValue: string): void;
-    getHeaderTitleColor(): string;
-    setEventColor(colorValue: string): void;
-    getEventColor(): string;
-    setSelectionColor(colorValue: string): void;
-    getSelectionColor(): string;
-    setTodayColor(colorValue: string): void;
-    getTodayColor(): string;
-    setTodaySelectionColor(colorValue: string): void;
-    getTodaySelectionColor(): string;
-    setBorderRadiusSelectedDay(borderRadiusValue: number): void;
-    getBorderRadiusSelectedDay(): number;
+    static events: Property;
+    static settings: Property;
+    static appearance: Property;
+    settings: Settings;
+    _settingsPropertyChanged(data: PropertyChangeData): void;
+    appearance: Appearance;
+    _appearancePropertyChanged(data: PropertyChangeData): void;
+    events: Array<CalendarEvent>;
+    _eventsPropertyChanged(data: PropertyChangeData): void;
 }

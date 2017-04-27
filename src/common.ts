@@ -1,11 +1,14 @@
-
 import { View } from "ui/core/view";
+import { PropertyMetadata } from "ui/core/proxy";
+import { Property, PropertyChangeData, PropertyMetadataSettings } from "ui/core/dependency-observable";
+import { isDefined } from "utils/types";
 
 export enum SELECTION_MODE {
     "SINGLE" = 1,
     "MULTIPLE" = 2
 }
 
+export const CALENDAR = "Calendar";
 export interface Appearance {
     weekdayTextColor: string,
     headerTitleColor: string,
@@ -13,7 +16,24 @@ export interface Appearance {
     selectionColor: string,
     todayColor: string,
     todaySelectionColor: string,
-    borderRadius: number
+    borderRadius: number,
+    hasBorder: boolean
+}
+export declare enum SCROLL_ORIENTATION {
+    "VERTICAL",
+    "HORIZONTAL"
+}
+export declare enum DISPLAY_MODE {
+    "WEEK",
+    "MONTH",
+}
+export interface Settings {
+    displayMode: DISPLAY_MODE,
+    selectionMode: SELECTION_MODE,
+    scrollOrientation: SCROLL_ORIENTATION,
+    firstWeekday: number,
+    minimumDate: Date,
+    maximumDate: Date
 }
 export interface INSEvents {
     dateSelected: string;
@@ -50,121 +70,68 @@ export class CalendarEvent {
         this._source = eventSource;
     }
 }
+const
+    SETTINGS = "settings",
+    APPEARANCE = "appearance",
+    EVENTS = "events";
+
+const
+    settingsProperty = new Property(SETTINGS, CALENDAR, new PropertyMetadata(undefined)),
+    appearanceProperty = new Property(APPEARANCE, CALENDAR, new PropertyMetadata(undefined)),
+    eventsProperty = new Property(EVENTS, CALENDAR, new PropertyMetadata(undefined));
+
+(<PropertyMetadata>settingsProperty.metadata).onSetNativeValue = function (data: PropertyChangeData) {
+    let calendar = <CalendarCommon>data.object;
+    calendar._settingsPropertyChanged(data);
+};
+(<PropertyMetadata>appearanceProperty.metadata).onSetNativeValue = function (data: PropertyChangeData) {
+    let calendar = <CalendarCommon>data.object;
+    calendar._appearancePropertyChanged(data);
+};
+(<PropertyMetadata>eventsProperty.metadata).onSetNativeValue = function (data: PropertyChangeData) {
+    let calendar = <CalendarCommon>data.object;
+    calendar._eventsPropertyChanged(data);
+};
 
 export class CalendarCommon extends View {
-    private _events: Array<any>;
-    public _displayMode: any;
-    private _selectionMode: SELECTION_MODE;
-    private _appearance: Appearance;
-    private _maximumDate: Date;
-    private _minimumDate: Date;
-    private _firstWeekday: number;
+    public static events = eventsProperty;
+    public static settings = settingsProperty;
+    public static appearance = appearanceProperty;
 
 
-    public getDisplayMode() {
-        return this._displayMode;
+    public get settings(): Settings {
+        return this._getValue(CalendarCommon.settings);
     }
 
-    public setDisplayMode(calendarDisplayMode: any): void {
-        this._displayMode = calendarDisplayMode;
+    public set settings(calendarSettingsValue: Settings) {
+        if (this.settings !== calendarSettingsValue && calendarSettingsValue) {
+            this._setValue(CalendarCommon.settings, calendarSettingsValue);
+        }
     }
 
-    public getEvents() {
-        return this._events;
+    public _settingsPropertyChanged(data: PropertyChangeData) { }
+
+    public get appearance(): Appearance {
+        return this._getValue(CalendarCommon.appearance);
     }
 
-    public setEvents(calendarEvents: any): void {
-        this._events = calendarEvents;
+    public set appearance(appearanceValue: Appearance) {
+        if (this.appearance !== appearanceValue && appearanceValue) {
+            this._setValue(CalendarCommon.appearance, appearanceValue);
+        }
     }
 
-    public getSelectionMode(): SELECTION_MODE {
-        return this._selectionMode;
+    public _appearancePropertyChanged(data: PropertyChangeData) { }
+
+    public get events() {
+        return this._getValue(CalendarCommon.events);
     }
 
-    public setSelectionMode(calendarSelectionMode: SELECTION_MODE): void {
-        this._selectionMode = calendarSelectionMode;
+    public set events(calendarEvents: Array<CalendarEvent>) {
+        if (this.events !== calendarEvents && calendarEvents) {
+            this._setValue(CalendarCommon.events, calendarEvents);
+        }
     }
 
-    public getAppearance(): Appearance {
-        return this._appearance;
-    }
-
-    public setAppearance(calendarAppearance: Appearance): void {
-        this._appearance = calendarAppearance;
-    }
-    public getMaximumDate(): Date {
-        return this._maximumDate;
-    }
-
-    public setMaximumDate(calendarMaxDate: Date): void {
-        this._maximumDate = calendarMaxDate;
-    }
-    public getMinimumDate(): Date {
-        return this._minimumDate;
-    }
-
-    public setMinimumDate(calendarMinDate: Date): void {
-        this._minimumDate = calendarMinDate;
-    }
-
-    public getFirstWeekday(): number {
-        return this._firstWeekday;
-    }
-
-    public setFirstWeekDay(calendarFirstWeekDay: number): void {
-        this._firstWeekday = calendarFirstWeekDay;
-    }
-
-    public setWeekdayTextColor(colorValue: string) {
-        this._appearance.weekdayTextColor = colorValue;
-    }
-
-    public getWeekdayTextColor(): string {
-        return this._appearance.weekdayTextColor;
-    }
-
-    public setHeaderTitleColor(colorValue: string) {
-        this._appearance.headerTitleColor = colorValue;
-    }
-
-    public getHeaderTitleColor(): string {
-        return this._appearance.headerTitleColor;
-    }
-
-    public setEventColor(colorValue: string) {
-        this._appearance.eventColor = colorValue;
-    }
-
-    public getEventColor(): string {
-        return this._appearance.eventColor;
-    }
-
-    public setSelectionColor(colorValue: string) {
-        this._appearance.selectionColor = colorValue;
-    }
-
-    public getSelectionColor(): string {
-        return this._appearance.selectionColor;
-    }
-
-    public setTodayColor(colorValue: string) {
-        this._appearance.todayColor = colorValue;
-    }
-    public getTodayColor(): string {
-        return this._appearance.todayColor;
-    }
-
-    public setTodaySelectionColor(colorValue: string) {
-        this._appearance.todaySelectionColor = colorValue;
-    }
-    public getTodaySelectionColor(): string {
-        return this._appearance.todaySelectionColor;
-    }
-
-    public setBorderRadiusSelectedDay(borderRadiusValue: number) {
-        this._appearance.borderRadius = borderRadiusValue;
-    }
-    public getBorderRadiusSelectedDay(): number {
-        return this._appearance.borderRadius;
-    }
+    public _eventsPropertyChanged(data: PropertyChangeData) { }
 }

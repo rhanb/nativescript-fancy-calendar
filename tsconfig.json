@@ -28,7 +28,8 @@
     },
     "exclude": [
         "demo",
-        "node_modules"
+        "node_modules",
+        "typingz-*"
     ],
     "compileOnSave": false
 }

@@ -11,6 +11,12 @@ export enum SCROLL_ORIENTATION {
     "VERTICAL",
     "HORIZONTAL"
 }
+export interface Settings {
+    displayMode: DISPLAY_MODE,
+    selectionMode: SELECTION_MODE,
+    scrollOrientation: SCROLL_ORIENTATION,
+    firstWeekday: number
+}
 export interface Appearance {
     weekdayTextColor: string;
     headerTitleColor: string;

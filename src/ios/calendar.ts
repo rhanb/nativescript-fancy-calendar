@@ -1,6 +1,8 @@
 import { View } from 'ui/core/view';
 import { Color } from "color";
-import { CalendarEvent, CalendarCommon, SELECTION_MODE, Appearance, NSEvents } from "../common";
+import { CalendarEvent, CalendarCommon, SELECTION_MODE, Appearance, NSEvents, Settings } from "../common";
+import { isDefined } from "utils/types";
+import { PropertyChangeData } from "ui/core/dependency-observable";
 
 declare const FSCalendar,
     FSCalendarScrollDirectionVertical,
@@ -11,14 +13,6 @@ declare const FSCalendar,
     FSCalendarDataSource
 CGRectMake;
 
-export enum SCROLL_ORIENTATION {
-    "VERTICAL" = FSCalendarScrollDirectionVertical,
-    "HORIZONTAL" = FSCalendarScrollDirectionHorizontal
-}
-export enum DISPLAY_MODE {
-    "WEEK" = FSCalendarScopeWeek,
-    "MONTH" = FSCalendarScopeMonth
-}
 
 
 export class CalendarSubtitle {
@@ -55,19 +49,46 @@ class CalendarDelegate extends NSObject {
         delegate._owner = owner;
         return delegate;
     }
-    public calendarDidSelectDate(date: NSDate) {
+    public calendarDidSelectDateAtMonthPosition?(calendar: any, date: Date, monthPosition: any): void {
         console.log('clandarDidSelectData');
-        this._owner.get().dateSelectedEvent(date);
+        console.dir(date);
+        console.dir(monthPosition);
+        if (this._owner) {
+            this._owner.get().dateSelectedEvent(date);
+        }
+    }
+    public calendarDidDeselectDateAtMonthPosition(calendar: any, date: Date, monthPosition: any): void {
+        console.log('clandarDidSelectData');
+        console.dir(date);
+        console.dir(monthPosition);
+        if (this._owner) {
+            this._owner.get().dateSelectedEvent(date);
+        }
+    }
+    public calendarCurrentMonthDidChange(calendar) {
+        console.log('calendarCurrentMonthDidChange');
+        console.dir(calendar.currentPage);
+        if (this._owner) {
+            this._owner.get().pageChanged(calendar);
+        }
     }
     public calendarCurrentPageDidChange(calendar) {
-        console.log('calendarPageDidChange');
-        this._owner.get().pageChanged(calendar);
+        console.log('calendarCurrentPageDidChanged');
+        console.dir(calendar.currentPage);
+        if (this._owner) {
+            this._owner.get().pageChanged(calendar);
+        }
     }
-
-    public calendarBoundingRectWillChange(bounds, animated) {
+    public calendarBoundingRectWillChangeAnimated(calendar: any, bounds: CGRect, animated: boolean) {
+        console.log('bounds');
         console.log('calendarBoundingRectWhillChange');
         let frame = this._owner.get().ios.frame;
-        this._owner.get().ios.frame = CGRectMake(frame.origin.x, frame.origin.y, bounds.size.width, bounds.size.height);
+        var rect = new CGRect({
+            origin: frame.origin,
+            size: bounds.size
+        });
+        this._owner.get().ios.frame = rect;
+        //this._owner.get().ios.view.layoutIfNeeded();
     }
 
     /*public calendarCurrentScopeWillChangeAnimated(calendar, animated: boolean): void {
@@ -80,51 +101,67 @@ class CalendarDataSource extends NSObject {
     private _owner: WeakRef<Calendar>;
 
     public static initWithOwner(owner: WeakRef<Calendar>): CalendarDataSource {
+        console.log('initWithOwner');
         let source = <CalendarDataSource>CalendarDataSource.new();
         source._owner = owner;
         return source;
     }
     public calendarHasEventForDate(calendar, date: NSDate): boolean {
-        return this._owner.get().dateHasEvent(date);
+        if (this._owner)
+            return this._owner.get().dateHasEvent(date);
+        return false;
     }
 
     public calendarSubtitleForDate(calendar, date: NSDate): string {
-        return this._owner.get().dateHasSubtitle(date);
+        if (this._owner)
+            return this._owner.get().dateHasSubtitle(date);
+        return undefined;
     }
 
-    public calendarImageForDate(calendar, date: NSDate): string {
+    public maximumDateForCalendar(calendar: any): Date {
+        console.log("maximumDateForCalendar");
+        console.dir(this._owner.get().settings.maximumDate);
+        return this._owner.get().settings.maximumDate;
+    }
+    public minimumDateForCalendar(calendar: any): Date {
+        console.log("minimumDateForCalendar");
+        console.dir(this._owner.get().settings.minimumDate);
+        return this._owner.get().settings.minimumDate;
+    }
+
+    public calendarNumberOfEventsForDate(calendar, date: Date): number {
+        return 2;
+    }
+    /*public calendarImageForDate(calendar, date: NSDate): string {
         return this._owner.get().dateHasEventImage(date);
     }
     public calendarMinimumDateForCalendar(calendar, date: NSDate): any {
         return this._owner.get().minimumDate;
     }
-
+    publi
     public calendarMaxDateForCalendar(calendar, date: NSDate): any {
         return this._owner.get().maximumDate;
-    }
+    }*/
 
 }
 export class Calendar extends CalendarCommon {
 
     private _ios: any;
-    private _scrollOrientation: SCROLL_ORIENTATION;
     private _subtitles: Array<CalendarSubtitle>;
-    private _hasBorder: boolean;
 
     constructor() {
         super();
         this._ios = FSCalendar.alloc().initWithFrame(CGRectMake(0, 0, 0, 0));
         this._ios.delegate = CalendarDelegate.initWithOwner(new WeakRef(this));
         this._ios.dataSource = CalendarDataSource.initWithOwner(new WeakRef(this));
-        super.setAppearance(<Appearance>{});
         this.appearance = <Appearance>{
-            weekdayTextColor: "",
-            headerTitleColor: "",
-            eventColor: "",
-            selectionColor: "",
-            todayColor: "",
-            todaySelectionColor: "",
-            borderRadius: 0
+            weekdayTextColor: "black",
+            headerTitleColor: "black",
+            eventColor: "red",
+            selectionColor: "blue",
+            todayColor: "yellow",
+            todaySelectionColor: "orange",
+            borderRadius: 25
         }
     }
 
@@ -136,113 +173,66 @@ export class Calendar extends CalendarCommon {
         return this._ios;
     }
 
-    public get scrollOrientation(): SCROLL_ORIENTATION {
-        return this._scrollOrientation;
-    }
-
-    public set scrollOrientation(scrollOrientationValue: SCROLL_ORIENTATION) {
-        if (scrollOrientationValue !== this._scrollOrientation) {
-            this._scrollOrientation = scrollOrientationValue;
-            this._ios.scrollDirection = this._scrollOrientation;
-        }
-
-    }
-
-
-    public set displayMode(displayModeValue: any) {
-        if (displayModeValue !== super.getDisplayMode()) {
-            super.setDisplayMode(displayModeValue);
-            this._ios.scope = this.displayMode;
-        }
-    }
-
-    public set selectionMode(calendarSelectionMode: SELECTION_MODE) {
-        if (super.getSelectionMode() !== calendarSelectionMode) {
-            super.setSelectionMode(calendarSelectionMode);
-            switch (super.getSelectionMode()) {
-                case SELECTION_MODE.MULTIPLE:
-                    this._ios.allowsMultipleSelection = true;
-                    break;
-                case SELECTION_MODE.SINGLE:
-                    this._ios.allowsMultipleSelection = false;
-                    break;
+    public _settingsPropertyChanged(data: PropertyChangeData) {
+        let newSettings = <Settings>data.newValue,
+            oldSettings = <Settings>data.oldValue;
+        if (isDefined(newSettings) && newSettings !== oldSettings) {
+            if (!oldSettings || newSettings.displayMode !== oldSettings.displayMode) {
+                //this._ios.scope = newSettings.displayMode;
+                console.log('change displayMode');
+                this._ios.setScopeAnimated(newSettings.displayMode, true);
+                //console.dump(this._ios);
+                //this._ios.calendar.setScope(newSettings.displayMode).animated(true);
+            }
+            if (!oldSettings || newSettings.selectionMode !== oldSettings.selectionMode) {
+                this._ios.allowsMultipleSelection = newSettings.selectionMode === SELECTION_MODE.MULTIPLE ? true : false;
+            }
+            if (!oldSettings || newSettings.scrollOrientation !== oldSettings.scrollOrientation) {
+                this._ios.scrollDirection = newSettings.scrollOrientation;
+            }
+            if (!oldSettings || newSettings.firstWeekday !== oldSettings.firstWeekday) {
+                let firstWeekdayTemp = newSettings.firstWeekday <= 7 && newSettings.firstWeekday > 0 ? newSettings.firstWeekday : 1;
+                this._ios.firstWeekday = firstWeekdayTemp;
+            }
+            if (!oldSettings || newSettings.maximumDate !== oldSettings.maximumDate) {
+                //maximumDate
+            }
+            if (!oldSettings || newSettings.minimumDate !== oldSettings.minimumDate) {
+                //minimumDate
             }
         }
     }
 
 
-    public set firstWeekday(firstWeekDayValue: number) {
-        if (super.getFirstWeekday() !== firstWeekDayValue) {
-            let firstWeekdayTemp = firstWeekDayValue <= 7 && super.getFirstWeekday() > 0 ? 1 : firstWeekDayValue;
-            super.setFirstWeekDay(firstWeekdayTemp);
-            this._ios.firstWeekday = super.getFirstWeekday();
-        }
 
-    }
-
-    public set appearance(appearanceValue: Appearance) {
-        if (appearanceValue !== super.getAppearance()) {
-            this.weekdayTextColor = appearanceValue.weekdayTextColor;
-            this.headerTitleColor = appearanceValue.headerTitleColor;
-            this.eventColor = appearanceValue.eventColor;
-            this.selectionColor = appearanceValue.selectionColor;
-            this.todayColor = appearanceValue.todayColor;
-            this.todaySelectionColor = appearanceValue.todaySelectionColor;
-            this.borderRadiusSelectedDay = appearanceValue.borderRadius;
-        }
-    }
-
-    public get appearance() {
-        return super.getAppearance();
-    }
-
-    private set weekdayTextColor(colorValue: string) {
-        if (super.getWeekdayTextColor() !== colorValue) {
-            super.setWeekdayTextColor(colorValue)
-            this._ios.appearance.weekdayTextColor = new Color(super.getWeekdayTextColor()).ios;
-        }
-    }
-    private set headerTitleColor(colorValue: string) {
-        if (super.getHeaderTitleColor() !== colorValue) {
-            super.setHeaderTitleColor(colorValue);
-            this._ios.appearance.headerTitleColor = new Color(super.getHeaderTitleColor()).ios;
-        }
-    }
-    private set eventColor(colorValue: string) {
-        if (super.getEventColor() !== colorValue) {
-            super.setEventColor(colorValue);
-            this.ios.appearance.eventColor = new Color(super.getEventColor()).ios;
-        }
-    }
-    private set selectionColor(colorValue: string) {
-        if (super.getSelectionColor() !== colorValue) {
-            super.setSelectionColor(colorValue);
-            this.ios.appearance.selectionColor = new Color(super.getSelectionColor()).ios;
-        }
-    }
-    private set todayColor(colorValue: string) {
-        if (super.getTodayColor() !== colorValue) {
-            super.setTodayColor(colorValue);
-            this._ios.appearance.todayColor = new Color(super.getTodayColor()).ios;
-        }
-    }
-    private set todaySelectionColor(colorValue: string) {
-        if (super.getTodaySelectionColor() !== colorValue) {
-            super.setTodaySelectionColor(colorValue);
-            this._ios.appearance.todaySelectionColor = new Color(super.getTodaySelectionColor()).ios;
-        }
-    }
-
-    private set borderRadiusSelectedDay(borderRadiusValue: number) {
-        if (super.getBorderRadiusSelectedDay() !== borderRadiusValue) {
-            super.setBorderRadiusSelectedDay(borderRadiusValue);
-            this._ios.appearance.borderRadius = super.getBorderRadiusSelectedDay();
-        }
-    }
-
-    public set events(calendarEvents: Array<CalendarEvent>) {
-        if (super.getEvents() !== calendarEvents) {
-            super.setEvents(calendarEvents);
+    public _appearancePropertyChanged(data: PropertyChangeData) {
+        let newAppearanceValue = <Appearance>data.newValue;
+        let oldAppearanceValue = <Appearance>data.oldValue;
+        if (newAppearanceValue && newAppearanceValue !== oldAppearanceValue) {
+            if (!oldAppearanceValue || newAppearanceValue.weekdayTextColor !== oldAppearanceValue.weekdayTextColor) {
+                this._ios.appearance.weekdayTextColor = new Color(newAppearanceValue.weekdayTextColor).ios;
+            }
+            if (!oldAppearanceValue || newAppearanceValue.headerTitleColor !== oldAppearanceValue.headerTitleColor) {
+                this._ios.appearance.headerTitleColor = new Color(newAppearanceValue.headerTitleColor).ios;
+            }
+            if (!oldAppearanceValue || newAppearanceValue.eventColor !== oldAppearanceValue.eventColor) {
+                this._ios.appearance.eventColor = new Color(newAppearanceValue.eventColor).ios;
+            }
+            if (!oldAppearanceValue || newAppearanceValue.selectionColor !== oldAppearanceValue.selectionColor) {
+                this._ios.appearance.selectionColor = new Color(newAppearanceValue.selectionColor).ios;
+            }
+            if (!oldAppearanceValue || newAppearanceValue.todayColor !== oldAppearanceValue.todayColor) {
+                this._ios.appearance.todayColor = new Color(newAppearanceValue.todayColor).ios;
+            }
+            if (!oldAppearanceValue || newAppearanceValue.todaySelectionColor !== oldAppearanceValue.todaySelectionColor) {
+                this._ios.appearance.todaySelectionColor = new Color(newAppearanceValue.todaySelectionColor).ios;
+            }
+            if (!oldAppearanceValue || newAppearanceValue.borderRadius !== oldAppearanceValue.borderRadius) {
+                this._ios.appearance.borderRadius = newAppearanceValue.borderRadius;
+            }
+            if (!oldAppearanceValue || newAppearanceValue.hasBorder !== oldAppearanceValue.hasBorder) {
+                this._ios.clipsToBounds = newAppearanceValue.hasBorder;
+            }
         }
     }
 
@@ -272,19 +262,23 @@ export class Calendar extends CalendarCommon {
 
     public dateHasEvent(date): boolean {
         let i = 0, found = false;
-        while (!found && i < super.getEvents().length) {
-            if (this.isSameDate(date, super.getEvents()[i].date) && !super.getEvents()[i].source) {
+        while (!found && i < this.events.length) {
+            if (this.isSameDate(date, this.events[i].date) && !this.events[i].source) {
                 found = true;
             }
             i++;
         }
         return found;
     }
+    public _eventsPropertyChanged(data: PropertyChangeData) {
+        this._ios.dataSource = CalendarDataSource.initWithOwner(new WeakRef(this));
+    }
+
     public dateHasEventImage(date): string {
         let i = 0, found = undefined;
-        while (!found && i < super.getEvents().length) {
-            if (this.isSameDate(date, super.getEvents()[i].date) && super.getEvents()[i].source) {
-                found = super.getEvents()[i].source;
+        while (!found && i < this.events.length) {
+            if (this.isSameDate(date, this.events[i].date) && this.events[i].source) {
+                found = this.events[i].source;
             }
             i++;
         }
@@ -309,27 +303,6 @@ export class Calendar extends CalendarCommon {
         return dateOne.getMonth() === dateTwo.getMonth() && dateOne.getDay() === dateTwo.getDay() && dateOne.getYear() === dateTwo.getYear() && dateOne.getDate() === dateTwo.getDate();
     }
 
-    public get hasBorder(): boolean {
-        return this._hasBorder;
-    }
-
-    public set hasBorder(calendarHasBorder: boolean) {
-        if (this._hasBorder !== calendarHasBorder) {
-            this._ios.clipsToBounds = this._hasBorder;
-        }
-    }
-
-    public set maximumDate(calendarMaxDate: Date) {
-        if (this.maximumDate !== calendarMaxDate) {
-            super.setMaximumDate(calendarMaxDate);
-        }
-    }
-
-    public set minimumDate(calendarMinDate: Date) {
-        if (this.minimumDate !== calendarMinDate) {
-            super.setMinimumDate(calendarMinDate);
-        }
-    }
 
     public reload() {
         this._ios.reloadData();
@@ -337,10 +310,5 @@ export class Calendar extends CalendarCommon {
 
     onLoaded() {
         super.onLoaded();
-        if (this.width && this.height) {
-            this._ios.frame = CGRectMake(0, 0, this.width, this.height);
-        } else {
-            this._ios.frame = CGRectMake(0, 0, 300, 300);
-        }
     }
 }
