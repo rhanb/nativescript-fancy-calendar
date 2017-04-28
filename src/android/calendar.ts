@@ -43,8 +43,6 @@ export class Calendar extends CalendarCommon {
             todaySelectionColor: "orange",
             borderRadius: 25
         }
-        console.dir(android.R.style.TextAppearance_AppCompat_Medium);
-        console.dir(android.R);
 
         this._android.setHeaderTextAppearance(android.R.style.TextAppearance_AppCompat_Medium);
         this._android.setWeekDayTextAppearance(android.R.style.TextAppearance_AppCompat_Medium);
@@ -52,7 +50,6 @@ export class Calendar extends CalendarCommon {
         let _that = this;
         this._selectedDateListener = new MaterialCalendarOnDateSelectedListener({
             onDateSelected: function (widget, date, selected) {
-                console.log('onDateSelected');
                 _that.notify({
                     eventName: NSEvents.dateSelected,
                     object: _that,
@@ -62,7 +59,6 @@ export class Calendar extends CalendarCommon {
         });
         this._selectedMonthListener = new MaterialCalendarOnMonthChangedListener({
             onMonthChanged: function (widget, date) {
-                console.log('onMonthSelected');
                 _that.notify({
                     eventName: NSEvents.monthChanged,
                     object: _that,
@@ -126,8 +122,7 @@ export class Calendar extends CalendarCommon {
                 this._android.setTitleAnimationOrientation(newSettings.scrollOrientation);
             }
             if (!oldSettings || newSettings.firstWeekday !== oldSettings.firstWeekday) {
-                let firstWeekdayTemp = newSettings.firstWeekday <= 7 && newSettings.firstWeekday > 0 ? 1 : newSettings.firstWeekday;
-                console.log(firstWeekdayTemp);
+                let firstWeekdayTemp = newSettings.firstWeekday <= 7 && newSettings.firstWeekday > 0 ? newSettings.firstWeekday: 1;
                 this._android.state().edit()
                     .setFirstDayOfWeek(firstWeekdayTemp)
                     .commit();

@@ -1,9 +1,16 @@
 import { Component } from "@angular/core";
-import { Calendar, SELECTION_MODE, DISPLAY_MODE, CalendarEvent, Appearance } from 'nativescript-fancy-calendar';
-
+import {
+    Calendar,
+    SELECTION_MODE,
+    DISPLAY_MODE,
+    CalendarEvent,
+    Appearance,
+    SCROLL_ORIENTATION,
+    CalendarSubtitle,
+    Settings
+} from 'nativescript-fancy-calendar';
 import { registerElement } from 'nativescript-angular';
 import { Color } from "color";
-import { SCROLL_ORIENTATION, CalendarSubtitle, Settings } from "nativescript-fancy-calendar";
 import { isIOS } from "platform";
 
 declare const NSDate;
@@ -30,7 +37,8 @@ export class AppComponent {
             selectionColor: "blue",
             todayColor: "blue",
             todaySelectionColor: "white",
-            borderRadius: 0
+            borderRadius: 0,
+            hasBorder: true
         }, {
                 weekdayTextColor: "yellow",
                 headerTitleColor: "black",
@@ -38,7 +46,8 @@ export class AppComponent {
                 selectionColor: "yellow",
                 todayColor: "yellow",
                 todaySelectionColor: "white",
-                borderRadius: 10
+                borderRadius: 10,
+                hasBorder: true
             }, {
                 weekdayTextColor: "pink",
                 headerTitleColor: "black",
@@ -46,7 +55,8 @@ export class AppComponent {
                 selectionColor: "pink",
                 todayColor: "pink",
                 todaySelectionColor: "white",
-                borderRadius: 15
+                borderRadius: 15,
+                hasBorder: false
             });
         var lastMonth = new Date();
         lastMonth.setMonth(lastMonth.getMonth() - 1);
@@ -62,11 +72,12 @@ export class AppComponent {
         };
         this.appearance = <Appearance>{
             weekdayTextColor: "white",
-            headerTitleColor: "#FFFFFF",
+            headerTitleColor: "white",
             eventColor: "white",
-            selectionColor: "green",
-            todayColor: "",
-            todaySelectionColor: "pink",
+            selectionColor: "#FF3366",
+            todayColor: "#831733",
+            hasBorder: true,
+            todaySelectionColor: "#FF3366",
             borderRadius: 50
         };
         this._calendar = <Calendar>event.object;

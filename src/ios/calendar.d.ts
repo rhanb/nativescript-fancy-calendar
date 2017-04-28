@@ -1,5 +1,9 @@
 import { CalendarCommon } from "../common";
 import { PropertyChangeData } from "ui/core/dependency-observable";
+export declare enum SCROLL_ORIENTATION {
+    "VERTICAL",
+    "HORIZONTAL",
+}
 export declare class CalendarSubtitle {
     private _date;
     private _text;
@@ -18,7 +22,7 @@ export declare class Calendar extends CalendarCommon {
     subtitles: Array<CalendarSubtitle>;
     dateSelectedEvent(date: any): void;
     pageChanged(calendar: any): void;
-    dateHasEvent(date: any): boolean;
+    dateHasEvent(date: any): number;
     _eventsPropertyChanged(data: PropertyChangeData): void;
     dateHasEventImage(date: any): string;
     dateHasSubtitle(date: any): string;

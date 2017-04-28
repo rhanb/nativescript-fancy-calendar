@@ -13,7 +13,10 @@ declare const FSCalendar,
     FSCalendarDataSource
 CGRectMake;
 
-
+export enum SCROLL_ORIENTATION {
+    "VERTICAL" = FSCalendarScrollDirectionVertical,
+    "HORIZONTAL" = FSCalendarScrollDirectionHorizontal
+}
 
 export class CalendarSubtitle {
     private _date: any;
@@ -50,45 +53,30 @@ class CalendarDelegate extends NSObject {
         return delegate;
     }
     public calendarDidSelectDateAtMonthPosition?(calendar: any, date: Date, monthPosition: any): void {
-        console.log('clandarDidSelectData');
-        console.dir(date);
-        console.dir(monthPosition);
         if (this._owner) {
             this._owner.get().dateSelectedEvent(date);
         }
     }
     public calendarDidDeselectDateAtMonthPosition(calendar: any, date: Date, monthPosition: any): void {
-        console.log('clandarDidSelectData');
-        console.dir(date);
-        console.dir(monthPosition);
         if (this._owner) {
             this._owner.get().dateSelectedEvent(date);
         }
     }
     public calendarCurrentMonthDidChange(calendar) {
         console.log('calendarCurrentMonthDidChange');
-        console.dir(calendar.currentPage);
         if (this._owner) {
             this._owner.get().pageChanged(calendar);
         }
     }
-    public calendarCurrentPageDidChange(calendar) {
-        console.log('calendarCurrentPageDidChanged');
-        console.dir(calendar.currentPage);
-        if (this._owner) {
-            this._owner.get().pageChanged(calendar);
-        }
-    }
+
     public calendarBoundingRectWillChangeAnimated(calendar: any, bounds: CGRect, animated: boolean) {
-        console.log('bounds');
-        console.log('calendarBoundingRectWhillChange');
+        console.log('calendarBoundingRectWillChangeAnimated');
         let frame = this._owner.get().ios.frame;
         var rect = new CGRect({
             origin: frame.origin,
             size: frame.size
         });
         this._owner.get().ios.frame = rect;
-        //this._owner.get().ios.view.layoutIfNeeded();
     }
 
 }
@@ -98,15 +86,9 @@ class CalendarDataSource extends NSObject {
     private _owner: WeakRef<Calendar>;
 
     public static initWithOwner(owner: WeakRef<Calendar>): CalendarDataSource {
-        console.log('initWithOwner');
         let source = <CalendarDataSource>CalendarDataSource.new();
         source._owner = owner;
         return source;
-    }
-    public calendarHasEventForDate(calendar, date: NSDate): boolean {
-        if (this._owner)
-            return this._owner.get().dateHasEvent(date);
-        return false;
     }
 
     public calendarSubtitleForDate(calendar, date: NSDate): string {
@@ -116,18 +98,16 @@ class CalendarDataSource extends NSObject {
     }
 
     public maximumDateForCalendar(calendar: any): Date {
-        console.log("maximumDateForCalendar");
-        console.dir(this._owner.get().settings.maximumDate);
         return this._owner.get().settings.maximumDate;
     }
     public minimumDateForCalendar(calendar: any): Date {
-        console.log("minimumDateForCalendar");
-        console.dir(this._owner.get().settings.minimumDate);
         return this._owner.get().settings.minimumDate;
     }
 
     public calendarNumberOfEventsForDate(calendar, date: Date): number {
-        return 2;
+        if (this._owner)
+            return this._owner.get().dateHasEvent(date);
+        return 0;
     }
 
 }
@@ -165,18 +145,14 @@ export class Calendar extends CalendarCommon {
             oldSettings = <Settings>data.oldValue;
         if (isDefined(newSettings) && newSettings !== oldSettings) {
             if (!oldSettings || newSettings.displayMode !== oldSettings.displayMode) {
-                //this._ios.scope = newSettings.displayMode;
-                console.log('change displayMode');
                 this._ios.setScopeAnimated(newSettings.displayMode, true);
-                //console.dump(this._ios);
-                //this._ios.calendar.setScope(newSettings.displayMode).animated(true);
             }
             if (!oldSettings || newSettings.selectionMode !== oldSettings.selectionMode) {
                 this._ios.allowsMultipleSelection = newSettings.selectionMode === SELECTION_MODE.MULTIPLE ? true : false;
-                console.log(this._ios.allowsMultipleSelection);
             }
             if (!oldSettings || newSettings.scrollOrientation !== oldSettings.scrollOrientation) {
-                this._ios.scrollDirection = newSettings.scrollOrientation;
+                console.log(newSettings.scrollOrientation);
+                this._ios.scrollDirection = newSettings.scrollOrientation === 0 ? SCROLL_ORIENTATION.VERTICAL : SCROLL_ORIENTATION.HORIZONTAL;
             }
             if (!oldSettings || newSettings.firstWeekday !== oldSettings.firstWeekday) {
                 let firstWeekdayTemp = newSettings.firstWeekday <= 7 && newSettings.firstWeekday > 0 ? newSettings.firstWeekday : 1;
@@ -236,7 +212,7 @@ export class Calendar extends CalendarCommon {
             eventName: NSEvents.dateSelected,
             object: this,
             data: date
-        })
+        });
     }
 
     public pageChanged(calendar) {
@@ -245,18 +221,18 @@ export class Calendar extends CalendarCommon {
             eventName: NSEvents.monthChanged,
             object: this,
             data: calendar
-        })
+        });
     }
 
-    public dateHasEvent(date): boolean {
-        let i = 0, found = false;
-        while (!found && i < this.events.length) {
-            if (this.isSameDate(date, this.events[i].date) && !this.events[i].source) {
-                found = true;
+    public dateHasEvent(date): number {
+        let countEventsDate = 0;
+        let _that = this;
+        this.events.forEach(function (event) {
+            if (_that.isSameDate(date, event.date)) {
+                countEventsDate++;
             }
-            i++;
-        }
-        return found;
+        })
+        return countEventsDate;
     }
     public _eventsPropertyChanged(data: PropertyChangeData) {
         this._ios.dataSource = CalendarDataSource.initWithOwner(new WeakRef(this));
