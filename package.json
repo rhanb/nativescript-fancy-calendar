@@ -1,6 +1,6 @@
 {
   "name": "nativescript-fancy-calendar",
-  "version": "0.0.5-1",
+  "version": "1.0.0",
   "description": "Fancy calendar for NativeScript :smile: :beers:",
   "main": "calendar",
   "typings": "index.d.ts",
