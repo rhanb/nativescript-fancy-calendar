@@ -42,4 +42,8 @@
 
     <style name="NativeScriptToolbarStyle" parent="NativeScriptToolbarStyleBase">
     </style>
+    <style name="CustomDayTextAppearance"
+        parent="TextAppearance.AppCompat.Medium">
+        <item name="android:textColor">@color/mcv_text_date_light</item>
+    </style>
 </resources> 

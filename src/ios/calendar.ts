@@ -85,15 +85,12 @@ class CalendarDelegate extends NSObject {
         let frame = this._owner.get().ios.frame;
         var rect = new CGRect({
             origin: frame.origin,
-            size: bounds.size
+            size: frame.size
         });
         this._owner.get().ios.frame = rect;
         //this._owner.get().ios.view.layoutIfNeeded();
     }
 
-    /*public calendarCurrentScopeWillChangeAnimated(calendar, animated: boolean): void {
-        console.log('calendarBoundingRectWhillChangeAnimated');
-    }*/
 }
 
 class CalendarDataSource extends NSObject {
@@ -132,16 +129,6 @@ class CalendarDataSource extends NSObject {
     public calendarNumberOfEventsForDate(calendar, date: Date): number {
         return 2;
     }
-    /*public calendarImageForDate(calendar, date: NSDate): string {
-        return this._owner.get().dateHasEventImage(date);
-    }
-    public calendarMinimumDateForCalendar(calendar, date: NSDate): any {
-        return this._owner.get().minimumDate;
-    }
-    publi
-    public calendarMaxDateForCalendar(calendar, date: NSDate): any {
-        return this._owner.get().maximumDate;
-    }*/
 
 }
 export class Calendar extends CalendarCommon {
@@ -186,6 +173,7 @@ export class Calendar extends CalendarCommon {
             }
             if (!oldSettings || newSettings.selectionMode !== oldSettings.selectionMode) {
                 this._ios.allowsMultipleSelection = newSettings.selectionMode === SELECTION_MODE.MULTIPLE ? true : false;
+                console.log(this._ios.allowsMultipleSelection);
             }
             if (!oldSettings || newSettings.scrollOrientation !== oldSettings.scrollOrientation) {
                 this._ios.scrollDirection = newSettings.scrollOrientation;

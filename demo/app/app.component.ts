@@ -22,6 +22,7 @@ export class AppComponent {
     private _calendar: Calendar;
 
     public calendarLoaded(event) {
+        console.log("calendarLoaded");
         this.appearanceOptions = new Array<Appearance>({
             weekdayTextColor: "blue",
             headerTitleColor: "black",
@@ -47,10 +48,10 @@ export class AppComponent {
                 todaySelectionColor: "white",
                 borderRadius: 15
             });
-            var lastMonth = new Date();
-            lastMonth.setMonth(lastMonth.getMonth()-1);
-            var nextMonth = new Date();
-            nextMonth.setMonth(nextMonth.getMonth()+1);
+        var lastMonth = new Date();
+        lastMonth.setMonth(lastMonth.getMonth() - 1);
+        var nextMonth = new Date();
+        nextMonth.setMonth(nextMonth.getMonth() + 1);
         this.settings = <Settings>{
             displayMode: DISPLAY_MODE.MONTH,
             scrollOrientation: SCROLL_ORIENTATION.HORIZONTAL,
@@ -60,19 +61,19 @@ export class AppComponent {
             minimumDate: lastMonth
         };
         this.appearance = <Appearance>{
-            weekdayTextColor: "green",
-            headerTitleColor: "black",
-            eventColor: "black",
-            selectionColor: "black",
-            todayColor: "green",
-            todaySelectionColor: "white",
-            borderRadius: 25
+            weekdayTextColor: "white",
+            headerTitleColor: "#FFFFFF",
+            eventColor: "white",
+            selectionColor: "green",
+            todayColor: "",
+            todaySelectionColor: "pink",
+            borderRadius: 50
         };
         this._calendar = <Calendar>event.object;
         let temp = new Date();
         let tommorow = new Date().getDate() + 1;
         temp.setDate(tommorow);
-        this.events = new Array<CalendarEvent>(new CalendarEvent(new Date()), new CalendarEvent(temp));
+        this.events = new Array<CalendarEvent>(new CalendarEvent(new Date()), new CalendarEvent(new Date()), new CalendarEvent(temp));
         if (isIOS) {
             let calendarSubtitle = new CalendarSubtitle(new Date(), "lol");
             this._calendar.subtitles = new Array<CalendarSubtitle>(calendarSubtitle);
@@ -89,7 +90,7 @@ export class AppComponent {
             selectionMode: this.settings.selectionMode,
             firstWeekday: this.settings.firstWeekday
         }
-        this._calendar.reload();
+        //// this._calendar.reload();
     }
 
     public changeOrientation() {
@@ -118,8 +119,13 @@ export class AppComponent {
 
     public changeSelectionMode() {
         let newSelectionMode: SELECTION_MODE;
-        this.settings.selectionMode = this.settings.selectionMode === SELECTION_MODE.MULTIPLE ? SELECTION_MODE.SINGLE : SELECTION_MODE.MULTIPLE;
-        console.log('changeOrientation');
+        newSelectionMode = this.settings.selectionMode === SELECTION_MODE.MULTIPLE ? SELECTION_MODE.SINGLE : SELECTION_MODE.MULTIPLE;
+        this.settings = {
+            displayMode: this.settings.displayMode,
+            scrollOrientation: this.settings.scrollOrientation,
+            selectionMode: newSelectionMode,
+            firstWeekday: this.settings.firstWeekday
+        }
     }
 
     public changeAppearance() {
@@ -128,7 +134,6 @@ export class AppComponent {
     }
 
     public changeEvents() {
-        console.log(this.events.length);
         if (this.events.length > 1) {
             this.events = new Array<CalendarEvent>(new CalendarEvent(new Date()));
         } else {
@@ -137,7 +142,7 @@ export class AppComponent {
             temp.setDate(tommorow);
             this.events = new Array<CalendarEvent>(new CalendarEvent(new Date()), new CalendarEvent(temp));
         }
-        this._calendar.reload();
+        //this._calendar.reload();
     }
 
 
@@ -145,13 +150,11 @@ export class AppComponent {
     public dateSelected(event) {
 
         console.log('date selected');
-        console.dir(event);
     }
 
 
     public monthChanged(event) {
         console.log('month selected');
-        console.dir(event);
     }
 }
 

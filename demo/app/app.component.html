@@ -7,7 +7,7 @@
         <Button (tap)="changeAppearance()" text="change appearance" class="btn"></Button>
         <Button (tap)="changeEvents()" text="change events" class="btn"></Button>
     </StackLayout>
-    <Calendar backgroundColor="#75C4ED" row="1" [settings]="settings" [events]="events" [hasBorder]="hasBorder" [appearance]="appearance"
-        ([dateSelected])="dateSelected($event)" ([monthChanged])="monthChanged($event)" (loaded)="calendarLoaded($event)">
+    <Calendar backgroundColor="#FFFFFF" row="1" [settings]="settings" [events]="events" [hasBorder]="hasBorder" [appearance]="appearance"
+        (dateSelected)="dateSelected($event)" (monthChanged)="monthChanged($event)" (loaded)="calendarLoaded($event)">
     </Calendar>
 </GridLayout>
