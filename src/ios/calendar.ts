@@ -63,14 +63,12 @@ class CalendarDelegate extends NSObject {
         }
     }
     public calendarCurrentMonthDidChange(calendar) {
-        console.log('calendarCurrentMonthDidChange');
         if (this._owner) {
             this._owner.get().pageChanged(calendar);
         }
     }
 
     public calendarBoundingRectWillChangeAnimated(calendar: any, bounds: CGRect, animated: boolean) {
-        console.log('calendarBoundingRectWillChangeAnimated');
         let frame = this._owner.get().ios.frame;
         var rect = new CGRect({
             origin: frame.origin,
@@ -151,7 +149,6 @@ export class Calendar extends CalendarCommon {
                 this._ios.allowsMultipleSelection = newSettings.selectionMode === SELECTION_MODE.MULTIPLE ? true : false;
             }
             if (!oldSettings || newSettings.scrollOrientation !== oldSettings.scrollOrientation) {
-                console.log(newSettings.scrollOrientation);
                 this._ios.scrollDirection = newSettings.scrollOrientation === 0 ? SCROLL_ORIENTATION.VERTICAL : SCROLL_ORIENTATION.HORIZONTAL;
             }
             if (!oldSettings || newSettings.firstWeekday !== oldSettings.firstWeekday) {
@@ -207,7 +204,6 @@ export class Calendar extends CalendarCommon {
     }
 
     public dateSelectedEvent(date) {
-        console.log('dateSelected');
         this.notify({
             eventName: NSEvents.dateSelected,
             object: this,
@@ -216,7 +212,6 @@ export class Calendar extends CalendarCommon {
     }
 
     public pageChanged(calendar) {
-        console.log('pageChanged');
         this.notify({
             eventName: NSEvents.monthChanged,
             object: this,
