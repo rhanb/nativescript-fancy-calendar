@@ -14,6 +14,8 @@ export declare class CalendarSubtitle {
 export declare class Calendar extends CalendarCommon {
     private _ios;
     private _subtitles;
+    private _delegate;
+    private _dataSource;
     constructor();
     readonly ios: any;
     readonly _nativeView: any;

@@ -113,12 +113,14 @@ export class Calendar extends CalendarCommon {
 
     private _ios: any;
     private _subtitles: Array<CalendarSubtitle>;
+    private _delegate: CalendarDelegate;
+    private _dataSource: CalendarDataSource;
 
     constructor() {
         super();
         this._ios = FSCalendar.alloc().initWithFrame(CGRectMake(0, 0, 0, 0));
-        this._ios.delegate = CalendarDelegate.initWithOwner(new WeakRef(this));
-        this._ios.dataSource = CalendarDataSource.initWithOwner(new WeakRef(this));
+        this._delegate = CalendarDelegate.initWithOwner(new WeakRef(this));
+        this._dataSource = CalendarDataSource.initWithOwner(new WeakRef(this));
         this.appearance = <Appearance>{
             weekdayTextColor: "black",
             headerTitleColor: "black",
@@ -269,5 +271,7 @@ export class Calendar extends CalendarCommon {
 
     onLoaded() {
         super.onLoaded();
+        this._ios.delegate = this._delegate;
+        this._ios.dataSource = this._dataSource;
     }
 }
