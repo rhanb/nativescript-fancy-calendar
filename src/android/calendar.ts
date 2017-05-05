@@ -117,6 +117,8 @@ export class Calendar extends CalendarCommon {
             }
             if (!oldSettings || newSettings.selectionMode !== oldSettings.selectionMode) {
                 this._android.setSelectionMode(newSettings.selectionMode);
+                console.log(this._android.getMeasuredHeight());
+                //this.height = this._android.getMeasuredHeight();
             }
             if (!oldSettings || newSettings.scrollOrientation !== oldSettings.scrollOrientation) {
                 this._android.setTitleAnimationOrientation(newSettings.scrollOrientation);

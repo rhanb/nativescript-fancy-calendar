@@ -16,8 +16,13 @@ export declare class Calendar extends CalendarCommon {
     private _subtitles;
     private _delegate;
     private _dataSource;
+    private _calendarHeightConstraint;
+    private _calendar;
     constructor();
     readonly ios: any;
+    readonly calendar: any;
+    readonly calendarHeightConstraint: NSLayoutConstraint;
+    setSalendarHeightConstraint(height: number): void;
     readonly _nativeView: any;
     _settingsPropertyChanged(data: PropertyChangeData): void;
     _appearancePropertyChanged(data: PropertyChangeData): void;
@@ -30,5 +35,6 @@ export declare class Calendar extends CalendarCommon {
     dateHasSubtitle(date: any): string;
     private isSameDate(dateOne, dateTwo);
     reload(): void;
+    displayModeChanged(bounds: any): void;
     onLoaded(): void;
 }

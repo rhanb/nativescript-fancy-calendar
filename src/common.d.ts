@@ -34,6 +34,7 @@ export interface Settings {
 export interface INSEvents {
     dateSelected: string;
     monthChanged: string;
+    displayModeChanged: string;
 }
 export declare const NSEvents: INSEvents;
 export declare class CalendarEvent {

@@ -38,10 +38,12 @@ export interface Settings {
 export interface INSEvents {
     dateSelected: string;
     monthChanged: string;
+    displayModeChanged: string;
 }
 export const NSEvents: INSEvents = {
     dateSelected: "dateSelected",
-    monthChanged: "monthChanged"
+    monthChanged: "monthChanged",
+    displayModeChanged: "displayModeChanged"
 }
 
 export class CalendarEvent {

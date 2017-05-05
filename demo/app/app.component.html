@@ -1,5 +1,13 @@
-<GridLayout rows="auto, *"> 
-    <Calendar backgroundColor="#686B74" row="1" [settings]="settings" [events]="events" [appearance]="appearance"
-        (dateSelected)="dateSelected($event)" (monthChanged)="monthChanged($event)" (loaded)="calendarLoaded($event)">
+<GridLayout rows="auto, auto">
+    <Calendar backgroundColor="#686B74" row="0" height="500" [settings]="settings" [events]="events" [appearance]="appearance" (dateSelected)="dateSelected($event)"
+        (monthChanged)="monthChanged($event)" (displayModeChanged)='displayModeChanged($event)' (loaded)="calendarLoaded($event)">
     </Calendar>
+    <StackLayout row="1" orientation="vertical">
+        <Button (tap)="changeOrientation()" text="change scroll orientation" class="btn"></Button>
+        <Button (tap)="changeDisplayMode()" text="change to week/month mode" class="btn"></Button>
+        <Button (tap)="changeFirstWeekDay()" text="change first week day" class="btn"></Button>
+        <Button (tap)="changeSelectionMode()" text="change to single/multiple selection" class="btn"></Button>
+        <Button (tap)="changeAppearance()" text="change appearance" class="btn"></Button>
+        <Button (tap)="changeEvents()" text="change events" class="btn"></Button>
+    </StackLayout>
 </GridLayout>

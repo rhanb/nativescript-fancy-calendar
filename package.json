@@ -39,7 +39,8 @@
     "test.ios": "cd demo && tns test ios --emulator",
     "test.ios.device": "cd demo && tns test ios",
     "test.android": "cd demo && tns test android",
-    "preparedemo": "npm run build && cd demo && tns plugin remove nativescript-fancy-calendar && tns plugin add .. && tns install"
+    "preparedemo": "npm run build && cd demo && tns plugin remove nativescript-fancy-calendar && tns plugin add .. && tns install",
+    "save": "cd demo && TNS_TYPESCRIPT_DECLARATIONS_PATH='$(pwd)/typingz' tns build ios"
   },
   "homepage": "https://github.com/rhanbIT/nativescript-fancy-calendar",
   "readmeFilename": "README.md",

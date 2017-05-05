@@ -13,7 +13,7 @@ import { registerElement } from 'nativescript-angular';
 import { Color } from "color";
 import { isIOS } from "platform";
 
-declare const NSDate;
+declare const NSDate, UIView, UIViewAnimationOptions;
 
 registerElement('Calendar', () => Calendar);
 @Component({
@@ -101,9 +101,20 @@ export class AppComponent {
             selectionMode: this.settings.selectionMode,
             firstWeekday: this.settings.firstWeekday
         }
+
         //// this._calendar.reload();
     }
+    public displayModeChanged(event) {
+        if (isIOS) {
+            let _that = this._calendar;
+            console.dir(event.data);
+            UIView.animateWithDurationDelayOptionsAnimationsCompletion(0.3, 0, UIViewAnimationOptions.CurveEaseInOut, () => {
+                _that.height = event.data.size.height;
+            }, (bool) => {
 
+            });
+        }
+    }
     public changeOrientation() {
         let newOrientation: SCROLL_ORIENTATION;
         let orientationValue;
@@ -153,14 +164,23 @@ export class AppComponent {
             temp.setDate(tommorow);
             this.events = new Array<CalendarEvent>(new CalendarEvent(new Date()), new CalendarEvent(temp));
         }
-        //this._calendar.reload();
+        this._calendar.reload();
     }
+
 
 
 
     public dateSelected(event) {
 
         console.log('date selected');
+        let displayModeValue;
+        displayModeValue = this.settings.displayMode === DISPLAY_MODE.MONTH ? DISPLAY_MODE.WEEK : DISPLAY_MODE.MONTH;
+        this.settings = {
+            displayMode: displayModeValue,
+            scrollOrientation: this.settings.scrollOrientation,
+            selectionMode: this.settings.selectionMode,
+            firstWeekday: this.settings.firstWeekday
+        }
     }
 
 
