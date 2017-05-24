@@ -1,8 +1,16 @@
-import { View } from 'ui/core/view';
-import { Color } from "color";
-import { CalendarEvent, CalendarCommon, SELECTION_MODE, Appearance, NSEvents } from "../common";
+import {
+    CalendarEvent,
+    CalendarBase,
+    SELECTION_MODE,
+    Appearance,
+    NSEvents,
+    eventsProperty,
+    settingsProperty,
+    Settings,
+    appearanceProperty
+} from "../common";
+import { Color } from "tns-core-modules/color";
 import { isDefined } from "utils/types";
-import { PropertyChangeData } from "ui/core/dependency-observable";
 import { SCROLL_ORIENTATION } from "../../calendar.android";
 
 declare const com, ColorDrawable, android, R;
@@ -17,23 +25,15 @@ const MaterialCalendar = com.prolificinteractive.materialcalendarview,
 
 
 
-export class Calendar extends CalendarCommon {
-
-    private _android: any;
-    private _selectedDateListener: any;
-    private _selectedMonthListener: any;
-
+export class Calendar extends CalendarBase {
 
     public get android() {
-        return this._android;
+        return this.nativeView;
     }
 
-    public get _nativeView(): any {
-        return this._android;
-    }
+    public createNativeView() {
+        let nativeView = new MaterialCalendarView(this._context);
 
-    public _createUI() {
-        this._android = new MaterialCalendarView(this._context);
         this.appearance = <Appearance>{
             weekdayTextColor: "black",
             headerTitleColor: "black",
@@ -44,119 +44,105 @@ export class Calendar extends CalendarCommon {
             borderRadius: 25
         }
 
-        this._android.setHeaderTextAppearance(android.R.style.TextAppearance_AppCompat_Medium);
-        this._android.setWeekDayTextAppearance(android.R.style.TextAppearance_AppCompat_Medium);
-        this._android.setDateTextAppearance(android.R.style.CustomDayTextAppearance);
-        let _that = this;
-        this._selectedDateListener = new MaterialCalendarOnDateSelectedListener({
+        nativeView.setHeaderTextAppearance(android.R.style.TextAppearance_AppCompat_Medium);
+        nativeView.setWeekDayTextAppearance(android.R.style.TextAppearance_AppCompat_Medium);
+        nativeView.setDateTextAppearance(android.R.style.CustomDayTextAppearance);
+
+        let _that = new WeakRef(this);
+
+        let selectedDateListener = new MaterialCalendarOnDateSelectedListener({
+            get owner(): Calendar {
+                return _that.get();
+            },
             onDateSelected: function (widget, date, selected) {
-                _that.notify({
+                this.owner.notify({
                     eventName: NSEvents.dateSelected,
                     object: _that,
                     data: { date: date, selected: selected }
                 });
             }
         });
-        this._selectedMonthListener = new MaterialCalendarOnMonthChangedListener({
+
+        nativeView.setOnDateChangedListener(selectedDateListener);
+
+        let selectedMonthListener = new MaterialCalendarOnMonthChangedListener({
+            get owner(): Calendar {
+                return _that.get();
+            },
             onMonthChanged: function (widget, date) {
-                _that.notify({
+                this.owner.notify({
                     eventName: NSEvents.monthChanged,
                     object: _that,
                     data: date
                 });
             }
         });
-        this._android.setOnDateChangedListener(this._selectedDateListener);
-        this._android.setOnMonthChangedListener(this._selectedMonthListener);
+
+        nativeView.setOnMonthChangedListener(selectedMonthListener);
+
+        return nativeView;
     }
 
+    [appearanceProperty.setNative](newAppearanceValue: Appearance) {
+        this.nativeView.setArrowColor(new Color(newAppearanceValue.headerTitleColor).android);
+        //this.nativeView.setHeaderTextAppearance(android.R.style.android)
 
+        this.nativeView.removeDecorators();
+        this.addDecoratorDot(newAppearanceValue.eventColor);
 
-    public _appearancePropertyChanged(data: PropertyChangeData) {
-        let newAppearanceValue = <Appearance>data.newValue;
-        let oldAppearanceValue = <Appearance>data.oldValue;
-        if (newAppearanceValue && newAppearanceValue !== oldAppearanceValue) {
-            if (!oldAppearanceValue || newAppearanceValue.headerTitleColor !== oldAppearanceValue.headerTitleColor) {
-                this._android.setArrowColor(new Color(newAppearanceValue.headerTitleColor).android);
-                //this._android.setHeaderTextAppearance(android.R.style.android)
-            }
-            if (!oldAppearanceValue || newAppearanceValue.eventColor !== oldAppearanceValue.eventColor) {
-                this._android.removeDecorators();
-                this.addDecoratorDot(newAppearanceValue.eventColor);
-            }
-            if (!oldAppearanceValue || newAppearanceValue.selectionColor !== oldAppearanceValue.selectionColor) {
-                this._android.setSelectionColor(new Color(newAppearanceValue.selectionColor).android);
-            }
-            if (!oldAppearanceValue || newAppearanceValue.todayColor !== oldAppearanceValue.todayColor || newAppearanceValue.todaySelectionColor !== oldAppearanceValue.todaySelectionColor || newAppearanceValue.borderRadius !== oldAppearanceValue.borderRadius) {
-                if (!newAppearanceValue.todaySelectionColor) {
-                    newAppearanceValue.todaySelectionColor = newAppearanceValue.selectionColor;
-                }
-                if (!newAppearanceValue.borderRadius) {
-                    newAppearanceValue.borderRadius = 50;
-                }
-                this._android.removeDecorators();
-                this.addDecoratorToday(new Date(), newAppearanceValue.todayColor, newAppearanceValue.todaySelectionColor, newAppearanceValue.borderRadius);
-                this.addDecoratorDot(this.appearance.eventColor);
-            }
-            /*
-            if (!oldAppearanceValue || newAppearanceValue.weekdayTextColor !== oldAppearanceValue.weekdayTextColor) {
-                this._ios.appearance.weekdayTextColor = new Color(newAppearanceValue.weekdayTextColor).ios;
-            }*/
+        this.nativeView.setSelectionColor(new Color(newAppearanceValue.selectionColor).android);
+
+        if (!newAppearanceValue.todaySelectionColor) {
+            newAppearanceValue.todaySelectionColor = newAppearanceValue.selectionColor;
         }
+        if (!newAppearanceValue.borderRadius) {
+            newAppearanceValue.borderRadius = 50;
+        }
+        this.nativeView.removeDecorators();
+        this.addDecoratorToday(new Date(), newAppearanceValue.todayColor, newAppearanceValue.todaySelectionColor, newAppearanceValue.borderRadius);
+        this.addDecoratorDot(this.appearance.eventColor);
+        /*
+        if (!oldAppearanceValue || newAppearanceValue.weekdayTextColor !== oldAppearanceValue.weekdayTextColor) {
+            this._ios.appearance.weekdayTextColor = new Color(newAppearanceValue.weekdayTextColor).ios;
+        }*/
+
     }
 
+    [settingsProperty.setNative](newSettings: Settings) {
+        let oldSettings = this.settings;
+        this.nativeView.state().edit()
+            .setCalendarDisplayMode(newSettings.displayMode)
+            .commit()
 
-    public _settingsPropertyChanged(data: PropertyChangeData) {
-        let newSettings = data.newValue,
-            oldSettings = data.oldValue;
-        if (isDefined(newSettings) && newSettings !== oldSettings) {
-            if (!oldSettings || newSettings.displayMode !== oldSettings.displayMode) {
-                this._android.state().edit()
-                    .setCalendarDisplayMode(newSettings.displayMode)
-                    .commit()
-            }
-            if (!oldSettings || newSettings.selectionMode !== oldSettings.selectionMode) {
-                this._android.setSelectionMode(newSettings.selectionMode);
-                console.log(this._android.getMeasuredHeight());
-                //this.height = this._android.getMeasuredHeight();
-            }
-            if (!oldSettings || newSettings.scrollOrientation !== oldSettings.scrollOrientation) {
-                this._android.setTitleAnimationOrientation(newSettings.scrollOrientation);
-            }
-            if (!oldSettings || newSettings.firstWeekday !== oldSettings.firstWeekday) {
-                let firstWeekdayTemp = newSettings.firstWeekday <= 7 && newSettings.firstWeekday > 0 ? newSettings.firstWeekday: 1;
-                this._android.state().edit()
-                    .setFirstDayOfWeek(firstWeekdayTemp)
-                    .commit();
-            }
-            let calendarMaxDate = newSettings.maximumDate;
-            if (!oldSettings || calendarMaxDate && calendarMaxDate !== oldSettings.maximumDate) {
-                this._android.state().edit()
-                    .setMaximumDate(new MaterialCalendarDay(calendarMaxDate.getFullYear(), calendarMaxDate.getMonth(), calendarMaxDate.getDate()))
-                    .commit();
-            }
-            let calendarMinDate = newSettings.minimumDate;
-            if (!oldSettings || calendarMaxDate && newSettings.minimumDate !== oldSettings.minimumDate) {
-                this._android.state().edit()
-                    .setMinimumDate(new MaterialCalendarDay(calendarMinDate.getFullYear(), calendarMinDate.getMonth(), calendarMinDate.getDate()))
-                    .commit();
-            }
-        }
+        this.nativeView.setSelectionMode(newSettings.selectionMode);
+
+        this.nativeView.setTitleAnimationOrientation(newSettings.scrollOrientation);
+
+        let firstWeekdayTemp = newSettings.firstWeekday <= 7 && newSettings.firstWeekday > 0 ? newSettings.firstWeekday : 1;
+        this.nativeView.state().edit()
+            .setFirstDayOfWeek(firstWeekdayTemp)
+            .commit();
+
+        let calendarMaxDate = newSettings.maximumDate;
+        this.nativeView.state().edit()
+            .setMaximumDate(new MaterialCalendarDay(calendarMaxDate.getFullYear(), calendarMaxDate.getMonth(), calendarMaxDate.getDate()))
+            .commit();
+
+        let calendarMinDate = newSettings.minimumDate;
+        this.nativeView.state().edit()
+            .setMinimumDate(new MaterialCalendarDay(calendarMinDate.getFullYear(), calendarMinDate.getMonth(), calendarMinDate.getDate()))
+            .commit();
     }
 
-    public _eventsPropertyChanged(data: PropertyChangeData) {
-        let newEvents = <Array<CalendarEvent>>data.newValue;
-        let oldEvents = <Array<CalendarEvent>>data.oldValue;
-        if (!oldEvents || newEvents && newEvents !== oldEvents) {
-            this._android.removeDecorators();
-            this.addDecoratorDot(this.appearance.eventColor);
-        }
+    [eventsProperty.setNative](newEvents: Array<CalendarEvent>) {
+        this.nativeView.removeDecorators();
+        this.addDecoratorDot(this.appearance.eventColor);
     }
 
 
     private addDecoratorToday(date: Date, colorBackgroundValue: string, colorSelectionValue: string, borderRadiusValue: number) {
         let _that = this;
-        this._android.addDecorator(new MaterialCalendarDecorator({
+        this.nativeView.addDecorator(new MaterialCalendarDecorator({
             shouldDecorate: (day: any) => {
                 let should = false;
                 if (this.isSameDate(day, date)) {
@@ -187,7 +173,7 @@ export class Calendar extends CalendarCommon {
 
     private addDecoratorDot(colorValue: string) {
         let _that = this;
-        this._android.addDecorator(
+        this.nativeView.addDecorator(
             new MaterialCalendarDecorator({
                 shouldDecorate: (day: any) => {
                     let should = false;

@@ -6,8 +6,8 @@
   "typings": "index.d.ts",
   "nativescript": {
     "platforms": {
-      "ios": "2.5.0",
-      "android": "2.5.0"
+      "ios": "3.0.0",
+      "android": "3.0.0"
     }
   },
   "repository": {
@@ -45,7 +45,8 @@
   "homepage": "https://github.com/rhanbIT/nativescript-fancy-calendar",
   "readmeFilename": "README.md",
   "devDependencies": {
-    "tns-core-modules": "^2.5.2",
-    "tns-platform-declarations": "^2.5.2"
+    "tns-core-modules": "^3.0.0",
+    "tns-platform-declarations": "^3.0.1",
+    "typescript": "^2.3.2"
   }
 }

@@ -22,7 +22,7 @@ registerElement('Calendar', () => Calendar);
 })
 export class AppComponent {
     appearanceOptions: Array<Appearance>;
-    settings: any;
+    settings: Settings;
     subtitles: CalendarSubtitle[];
     events: CalendarEvent[];
     public appearance: Appearance;
@@ -95,11 +95,13 @@ export class AppComponent {
         let newDisplayMode: DISPLAY_MODE;
         let displayModeValue;
         displayModeValue = this.settings.displayMode === DISPLAY_MODE.MONTH ? DISPLAY_MODE.WEEK : DISPLAY_MODE.MONTH;
-        this.settings = {
+        this.settings = <Settings>{
             displayMode: displayModeValue,
             scrollOrientation: this.settings.scrollOrientation,
             selectionMode: this.settings.selectionMode,
-            firstWeekday: this.settings.firstWeekday
+            firstWeekday: this.settings.firstWeekday,
+            maximumDate: this.settings.maximumDate,
+            minimumDate: this.settings.minimumDate
         }
 
         //// this._calendar.reload();
@@ -119,22 +121,27 @@ export class AppComponent {
         let newOrientation: SCROLL_ORIENTATION;
         let orientationValue;
         orientationValue = this.settings.scrollOrientation === SCROLL_ORIENTATION.HORIZONTAL ? SCROLL_ORIENTATION.VERTICAL : SCROLL_ORIENTATION.HORIZONTAL;
-        this.settings = {
+        let newSettings = <Settings>{
             displayMode: this.settings.displayMode,
             scrollOrientation: orientationValue,
             selectionMode: this.settings.selectionMode,
-            firstWeekday: this.settings.firstWeekday
+            firstWeekday: this.settings.firstWeekday,
+            maximumDate: this.settings.maximumDate,
+            minimumDate: this.settings.minimumDate
         }
+        this.settings = newSettings;
         console.log('changeOrientation');
     }
 
     public changeFirstWeekDay() {
         let newFirstWeekDay = Math.floor(Math.random() * (1 + 7 - 1)) + 1;
-        this.settings = {
+        this.settings = <Settings>{
             displayMode: this.settings.displayMode,
             scrollOrientation: this.settings.scrollOrientation,
             selectionMode: this.settings.selectionMode,
-            firstWeekday: newFirstWeekDay
+            firstWeekday: newFirstWeekDay,
+            maximumDate: this.settings.maximumDate,
+            minimumDate: this.settings.minimumDate
         }
         console.log('changeFirstWeekDay');
     }
@@ -142,11 +149,13 @@ export class AppComponent {
     public changeSelectionMode() {
         let newSelectionMode: SELECTION_MODE;
         newSelectionMode = this.settings.selectionMode === SELECTION_MODE.MULTIPLE ? SELECTION_MODE.SINGLE : SELECTION_MODE.MULTIPLE;
-        this.settings = {
+        this.settings = <Settings>{
             displayMode: this.settings.displayMode,
             scrollOrientation: this.settings.scrollOrientation,
             selectionMode: newSelectionMode,
-            firstWeekday: this.settings.firstWeekday
+            firstWeekday: this.settings.firstWeekday,
+            maximumDate: this.settings.maximumDate,
+            minimumDate: this.settings.minimumDate
         }
     }
 
@@ -171,16 +180,7 @@ export class AppComponent {
 
 
     public dateSelected(event) {
-
         console.log('date selected');
-        let displayModeValue;
-        displayModeValue = this.settings.displayMode === DISPLAY_MODE.MONTH ? DISPLAY_MODE.WEEK : DISPLAY_MODE.MONTH;
-        this.settings = {
-            displayMode: displayModeValue,
-            scrollOrientation: this.settings.scrollOrientation,
-            selectionMode: this.settings.selectionMode,
-            firstWeekday: this.settings.firstWeekday
-        }
     }
 
 

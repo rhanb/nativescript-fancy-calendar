@@ -1,5 +1,5 @@
-<GridLayout rows="auto, auto">
-    <Calendar backgroundColor="#686B74" row="0" height="500" [settings]="settings" [events]="events" [appearance]="appearance" (dateSelected)="dateSelected($event)"
+<GridLayout rows="auto, *">
+    <Calendar backgroundColor="#686B74" row="0" [settings]="settings" height="200" [events]="events" [appearance]="appearance" (dateSelected)="dateSelected($event)"
         (monthChanged)="monthChanged($event)" (displayModeChanged)='displayModeChanged($event)' (loaded)="calendarLoaded($event)">
     </Calendar>
     <StackLayout row="1" orientation="vertical">

@@ -1,8 +1,16 @@
-import { View } from 'ui/core/view';
-import { Color } from "color";
-import { CalendarEvent, CalendarCommon, SELECTION_MODE, Appearance, NSEvents, Settings } from "../common";
+import {
+    CalendarEvent,
+    CalendarBase,
+    SELECTION_MODE,
+    Appearance,
+    NSEvents,
+    Settings,
+    settingsProperty,
+    appearanceProperty,
+    eventsProperty
+} from "../common";
 import { isDefined } from "utils/types";
-import { PropertyChangeData } from "ui/core/dependency-observable";
+import { Color } from "tns-core-modules/color";
 
 declare const FSCalendar,
     FSCalendarScrollDirectionVertical,
@@ -16,6 +24,11 @@ CGRectMake;
 export enum SCROLL_ORIENTATION {
     "VERTICAL" = FSCalendarScrollDirectionVertical,
     "HORIZONTAL" = FSCalendarScrollDirectionHorizontal
+}
+
+export enum DISPLAY_MODE {
+    "WEEK" = FSCalendarScopeWeek,
+    "MONTH" = FSCalendarScopeMonth
 }
 
 export class CalendarSubtitle {
@@ -48,7 +61,7 @@ class CalendarDelegate extends NSObject {
     private _owner: WeakRef<Calendar>;
 
     public static initWithOwner(owner: WeakRef<Calendar>): CalendarDelegate {
-        let delegate = <CalendarDelegate>CalendarDelegate.new();
+        let delegate = <CalendarDelegate>CalendarDelegate.new() as CalendarDelegate;
         delegate._owner = owner;
         return delegate;
     }
@@ -107,10 +120,12 @@ class CalendarDataSource extends NSObject {
     }
 
     public maximumDateForCalendar(calendar: any): Date {
-        return this._owner.get().settings.maximumDate;
+        let maximumDate = this._owner && this._owner.get().settings && isDefined(this._owner.get().settings.maximumDate) ? this._owner.get().settings.maximumDate : null;
+        return maximumDate;
     }
     public minimumDateForCalendar(calendar: any): Date {
-        return this._owner.get().settings.minimumDate;
+        let minimumDate = this._owner.get().settings && isDefined(this._owner.get().settings.minimumDate) ? this._owner.get().settings.minimumDate : null;
+        return minimumDate;
     }
 
     public calendarNumberOfEventsForDate(calendar, date: Date): number {
@@ -120,19 +135,16 @@ class CalendarDataSource extends NSObject {
     }
 
 }
-export class Calendar extends CalendarCommon {
-    private _ios: any;
+export class Calendar extends CalendarBase {
     private _subtitles: Array<CalendarSubtitle>;
     private _delegate: CalendarDelegate;
     private _dataSource: CalendarDataSource;
     private _calendarHeightConstraint: NSLayoutConstraint;
-    private _calendar: any;
+
     constructor() {
 
         super();
-        this._ios = UIView.alloc().initWithFrame(CGRectMake(0, 0, 320, 300));
-        this._calendar = FSCalendar.alloc().initWithFrame(CGRectMake(0, 0, 320, 300));
-        this._ios.addSubview(this._calendar);
+        this.nativeView = FSCalendar.alloc().initWithFrame(CGRectMake(0, 0, 320, 300));
         this._delegate = CalendarDelegate.initWithOwner(new WeakRef(this));
         this._dataSource = CalendarDataSource.initWithOwner(new WeakRef(this));
         this._calendarHeightConstraint = new NSLayoutConstraint();
@@ -145,14 +157,41 @@ export class Calendar extends CalendarCommon {
             todaySelectionColor: "orange",
             borderRadius: 25
         }
+        this.settings = <Settings>{
+            displayMode: DISPLAY_MODE.MONTH,
+            scrollOrientation: SCROLL_ORIENTATION.HORIZONTAL,
+            selectionMode: SELECTION_MODE.SINGLE,
+            firstWeekday: 3,
+            maximumDate: undefined,
+            minimumDate: undefined
+        };
     }
 
     public get ios() {
-        return this._ios;
+        return this.nativeView;
     }
 
-    public get calendar() {
-        return this._calendar;
+    public onLoaded() {
+        super.onLoaded();
+        if (this.height) {
+            this.nativeView.frame.size.height = this.height;
+            this.nativeView.frame.size.height = this.height;
+            //this._calendarHeightConstraint.constant = this.height;
+        }
+        if (this.width) {
+            this.nativeView.frame.size.width = this.width;
+            this.nativeView.frame.size.width = this.width;
+        }
+        this.nativeView.delegate = this._delegate;
+        this.nativeView.dataSource = this._dataSource;
+    }
+
+    public onUnloaded() {
+
+    }
+
+    public disposeNativeView() {
+
     }
 
     public get calendarHeightConstraint(): NSLayoutConstraint {
@@ -163,67 +202,43 @@ export class Calendar extends CalendarCommon {
         this._calendarHeightConstraint.constant = height;
     }
 
-    public get _nativeView() {
-        return this._ios;
+    [settingsProperty.setNative](newSettings: Settings) {
+        console.dir(newSettings);
+
+        this.nativeView.setScopeAnimated(newSettings.displayMode, true);
+
+        this.nativeView.allowsMultipleSelection = newSettings.selectionMode === SELECTION_MODE.MULTIPLE ? true : false;
+
+        this.nativeView.scrollDirection = newSettings.scrollOrientation === 0 ? SCROLL_ORIENTATION.VERTICAL : SCROLL_ORIENTATION.HORIZONTAL;
+
+        let firstWeekdayTemp = newSettings.firstWeekday <= 7 && newSettings.firstWeekday > 0 ? newSettings.firstWeekday : 1;
+
+        this.nativeView.firstWeekday = firstWeekdayTemp;
+
+        //maximumDate
+
+        //minimumDate
     }
 
-    public _settingsPropertyChanged(data: PropertyChangeData) {
-        let newSettings = <Settings>data.newValue,
-            oldSettings = <Settings>data.oldValue;
-        if (isDefined(newSettings) && newSettings !== oldSettings) {
-            if (!oldSettings || newSettings.displayMode !== oldSettings.displayMode) {
-                this._calendar.setScopeAnimated(newSettings.displayMode, true);
-            }
-            if (!oldSettings || newSettings.selectionMode !== oldSettings.selectionMode) {
-                this._calendar.allowsMultipleSelection = newSettings.selectionMode === SELECTION_MODE.MULTIPLE ? true : false;
-            }
-            if (!oldSettings || newSettings.scrollOrientation !== oldSettings.scrollOrientation) {
-                this._calendar.scrollDirection = newSettings.scrollOrientation === 0 ? SCROLL_ORIENTATION.VERTICAL : SCROLL_ORIENTATION.HORIZONTAL;
-            }
-            if (!oldSettings || newSettings.firstWeekday !== oldSettings.firstWeekday) {
-                let firstWeekdayTemp = newSettings.firstWeekday <= 7 && newSettings.firstWeekday > 0 ? newSettings.firstWeekday : 1;
-                this._calendar.firstWeekday = firstWeekdayTemp;
-            }
-            if (!oldSettings || newSettings.maximumDate !== oldSettings.maximumDate) {
-                //maximumDate
-            }
-            if (!oldSettings || newSettings.minimumDate !== oldSettings.minimumDate) {
-                //minimumDate
-            }
-        }
-    }
+    [appearanceProperty.setNative](newAppearanceValue: Appearance) {
+        console.dir(newAppearanceValue);
 
+        this.nativeView.appearance.weekdayTextColor = new Color(newAppearanceValue.weekdayTextColor).ios;
 
+        this.nativeView.appearance.headerTitleColor = new Color(newAppearanceValue.headerTitleColor).ios;
 
-    public _appearancePropertyChanged(data: PropertyChangeData) {
-        let newAppearanceValue = <Appearance>data.newValue;
-        let oldAppearanceValue = <Appearance>data.oldValue;
-        if (newAppearanceValue && newAppearanceValue !== oldAppearanceValue) {
-            if (!oldAppearanceValue || newAppearanceValue.weekdayTextColor !== oldAppearanceValue.weekdayTextColor) {
-                this._calendar.appearance.weekdayTextColor = new Color(newAppearanceValue.weekdayTextColor).ios;
-            }
-            if (!oldAppearanceValue || newAppearanceValue.headerTitleColor !== oldAppearanceValue.headerTitleColor) {
-                this._calendar.appearance.headerTitleColor = new Color(newAppearanceValue.headerTitleColor).ios;
-            }
-            if (!oldAppearanceValue || newAppearanceValue.eventColor !== oldAppearanceValue.eventColor) {
-                this._calendar.appearance.eventColor = new Color(newAppearanceValue.eventColor).ios;
-            }
-            if (!oldAppearanceValue || newAppearanceValue.selectionColor !== oldAppearanceValue.selectionColor) {
-                this._calendar.appearance.selectionColor = new Color(newAppearanceValue.selectionColor).ios;
-            }
-            if (!oldAppearanceValue || newAppearanceValue.todayColor !== oldAppearanceValue.todayColor) {
-                this._calendar.appearance.todayColor = new Color(newAppearanceValue.todayColor).ios;
-            }
-            if (!oldAppearanceValue || newAppearanceValue.todaySelectionColor !== oldAppearanceValue.todaySelectionColor) {
-                this._calendar.appearance.todaySelectionColor = new Color(newAppearanceValue.todaySelectionColor).ios;
-            }
-            if (!oldAppearanceValue || newAppearanceValue.borderRadius !== oldAppearanceValue.borderRadius) {
-                this._calendar.appearance.borderRadius = newAppearanceValue.borderRadius;
-            }
-            if (!oldAppearanceValue || newAppearanceValue.hasBorder !== oldAppearanceValue.hasBorder) {
-                this._calendar.clipsToBounds = newAppearanceValue.hasBorder;
-            }
-        }
+        this.nativeView.appearance.eventColor = new Color(newAppearanceValue.eventColor).ios;
+
+        this.nativeView.appearance.selectionColor = new Color(newAppearanceValue.selectionColor).ios;
+
+        this.nativeView.appearance.todayColor = new Color(newAppearanceValue.todayColor).ios;
+
+        this.nativeView.appearance.todaySelectionColor = new Color(newAppearanceValue.todaySelectionColor).ios;
+
+        this.nativeView.appearance.borderRadius = newAppearanceValue.borderRadius;
+
+        this.nativeView.clipsToBounds = newAppearanceValue.hasBorder;
+
     }
 
     public set subtitles(calendarSubtitles: Array<CalendarSubtitle>) {
@@ -258,8 +273,9 @@ export class Calendar extends CalendarCommon {
         })
         return countEventsDate;
     }
-    public _eventsPropertyChanged(data: PropertyChangeData) {
-        this._calendar.dataSource = CalendarDataSource.initWithOwner(new WeakRef(this));
+
+    [eventsProperty.setNative](newEvents: CalendarEvent) {
+        this.nativeView.dataSource = CalendarDataSource.initWithOwner(new WeakRef(this));
     }
 
     public dateHasEventImage(date): string {
@@ -293,29 +309,14 @@ export class Calendar extends CalendarCommon {
 
 
     public reload() {
-        this._calendar.reloadData();
+        this.nativeView.reloadData();
     }
 
-    public displayModeChanged (bounds) {
+    public displayModeChanged(bounds) {
         this.notify({
             eventName: NSEvents.displayModeChanged,
             object: this,
             data: bounds
         });
-    }
-
-    onLoaded() {
-        super.onLoaded();
-        if (this.height) {
-            this._ios.frame.size.height = this.height;
-            this._calendar.frame.size.height = this.height;
-            this._calendarHeightConstraint.constant = this.height;
-        }
-        if (this.width) {
-            this._ios.frame.size.width = this.width;
-            this._calendar.frame.size.width = this.width;
-        }
-        this._calendar.delegate = this._delegate;
-        this._calendar.dataSource = this._dataSource;
     }
 }

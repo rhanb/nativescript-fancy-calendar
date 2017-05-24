@@ -1,8 +1,11 @@
-import { CalendarCommon } from "../common";
-import { PropertyChangeData } from "ui/core/dependency-observable";
+import { CalendarBase } from "../common";
 export declare enum SCROLL_ORIENTATION {
     "VERTICAL",
     "HORIZONTAL",
+}
+export declare enum DISPLAY_MODE {
+    "WEEK",
+    "MONTH",
 }
 export declare class CalendarSubtitle {
     private _date;
@@ -11,30 +14,25 @@ export declare class CalendarSubtitle {
     date: any;
     text: string;
 }
-export declare class Calendar extends CalendarCommon {
-    private _ios;
+export declare class Calendar extends CalendarBase {
     private _subtitles;
     private _delegate;
     private _dataSource;
     private _calendarHeightConstraint;
-    private _calendar;
     constructor();
     readonly ios: any;
-    readonly calendar: any;
+    onLoaded(): void;
+    onUnloaded(): void;
+    disposeNativeView(): void;
     readonly calendarHeightConstraint: NSLayoutConstraint;
     setSalendarHeightConstraint(height: number): void;
-    readonly _nativeView: any;
-    _settingsPropertyChanged(data: PropertyChangeData): void;
-    _appearancePropertyChanged(data: PropertyChangeData): void;
     subtitles: Array<CalendarSubtitle>;
     dateSelectedEvent(date: any): void;
     pageChanged(calendar: any): void;
     dateHasEvent(date: any): number;
-    _eventsPropertyChanged(data: PropertyChangeData): void;
     dateHasEventImage(date: any): string;
     dateHasSubtitle(date: any): string;
     private isSameDate(dateOne, dateTwo);
     reload(): void;
     displayModeChanged(bounds: any): void;
-    onLoaded(): void;
 }
