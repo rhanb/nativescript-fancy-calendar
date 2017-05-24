@@ -1,4 +1,4 @@
-import { Component } from "@angular/core";
+import { Component, ElementRef, ViewChild } from "@angular/core";
 import {
     Calendar,
     SELECTION_MODE,
@@ -12,6 +12,7 @@ import {
 import { registerElement } from 'nativescript-angular';
 import { Color } from "color";
 import { isIOS } from "platform";
+import { AnimationCurve } from "ui/enums";
 
 declare const NSDate, UIView, UIViewAnimationOptions;
 
@@ -21,12 +22,17 @@ registerElement('Calendar', () => Calendar);
     templateUrl: "app.component.html",
 })
 export class AppComponent {
+    @ViewChild("layout") layout: ElementRef;
+    @ViewChild("calendar") calendar: ElementRef;
+    @ViewChild("container") container: ElementRef;
+
     appearanceOptions: Array<Appearance>;
     settings: Settings;
     subtitles: CalendarSubtitle[];
     events: CalendarEvent[];
     public appearance: Appearance;
     private _calendar: Calendar;
+    private _layout: any;
 
     public calendarLoaded(event) {
         console.log("calendarLoaded");
@@ -106,16 +112,28 @@ export class AppComponent {
 
         //// this._calendar.reload();
     }
+    public layoutLoaded(event) {
+        this._layout = <any>event.object;
+    }
     public displayModeChanged(event) {
+        //let newHeight = this.container.nativeElement.nativeView.frame.size.height - event.data.size.height;
+        //this.layout.nativeElement.height = newHeight;
         if (isIOS) {
-            let _that = this._calendar;
-            console.dir(event.data);
-            UIView.animateWithDurationDelayOptionsAnimationsCompletion(0.3, 0, UIViewAnimationOptions.CurveEaseInOut, () => {
-                _that.height = event.data.size.height;
-            }, (bool) => {
-
+            let newY = 0;
+            if (this.settings.displayMode !== DISPLAY_MODE.MONTH) {
+                newY = this.container.nativeElement.nativeView.frame.size.height - this._layout.nativeView.frame.size.height - event.data.size.height + 1;
+            }
+            this._layout.animate({
+                translate: {
+                    x: 0,
+                    y: - newY
+                },
+                duration: 300,
+                curve: AnimationCurve.easeInOut
             });
         }
+
+        //getRows
     }
     public changeOrientation() {
         let newOrientation: SCROLL_ORIENTATION;

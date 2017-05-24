@@ -98,6 +98,25 @@ class CalendarDelegate extends NSObject {
             _that.get()._owner = container;
         }, (bool) => {
         });*/
+        /*
+        calendar.frame = (CGRect){calendar.frame.origin,bounds.size}
+        */
+        console.log('is parent defined?');
+
+        let iosFrame = this._owner.get().ios.frame;
+        //iosFrame.size.height = bounds.size.height
+        calendar.frame = CGRectMake(0, 0, bounds.size.width, bounds.size.height);
+        //this._owner.get().ios.frame = CGRectMake(0, 0, bounds.size.width, bounds.size.height);
+
+        //parent.nativeView.frame = CGRectMake(0, 0, parent.nativeView.frame.size.width, parent.nativeView.frame.size.height - bounds.size.height);
+
+        //this._owner.get().setCalendarHeightConstraint(bounds.size.height);
+        /*console.dir(this._owner.get().nativeView.ios);
+        this._owner.get().nativeView.layoutIfNeeded();*/
+
+        //this._owner.get().ios.layoutIfNeeded();
+        // parent.nativeView.layoutIfNeeded();
+
         this._owner.get().displayModeChanged(bounds);
     }
 
@@ -108,7 +127,7 @@ class CalendarDataSource extends NSObject {
     private _owner: WeakRef<Calendar>;
 
     public static initWithOwner(owner: WeakRef<Calendar>): CalendarDataSource {
-        let source = <CalendarDataSource>CalendarDataSource.new();
+        let source = <CalendarDataSource>CalendarDataSource.new() as CalendarDataSource;
         source._owner = owner;
         return source;
     }
@@ -174,36 +193,37 @@ export class Calendar extends CalendarBase {
     public onLoaded() {
         super.onLoaded();
         if (this.height) {
-            this.nativeView.frame.size.height = this.height;
-            this.nativeView.frame.size.height = this.height;
-            //this._calendarHeightConstraint.constant = this.height;
+            this.nativeView.frame.size.height = this.getMeasuredHeight();
+            this.nativeView.frame.size.height = this.getMeasuredHeight();
+            this._calendarHeightConstraint.constant = this.getMeasuredHeight();
         }
         if (this.width) {
-            this.nativeView.frame.size.width = this.width;
-            this.nativeView.frame.size.width = this.width;
+            this.nativeView.frame.size.width = this.getMeasuredWidth();
+            this.nativeView.frame.size.width = this.getMeasuredWidth();
         }
         this.nativeView.delegate = this._delegate;
         this.nativeView.dataSource = this._dataSource;
     }
 
     public onUnloaded() {
-
+        this._delegate = null;
+        this._dataSource = null;
     }
 
     public disposeNativeView() {
-
+        this.nativeView.delegate = null;
+        this.nativeView.dataSource = null;
     }
 
     public get calendarHeightConstraint(): NSLayoutConstraint {
         return this._calendarHeightConstraint
     }
 
-    public setSalendarHeightConstraint(height: number) {
+    public setCalendarHeightConstraint(height: number) {
         this._calendarHeightConstraint.constant = height;
     }
 
     [settingsProperty.setNative](newSettings: Settings) {
-        console.dir(newSettings);
 
         this.nativeView.setScopeAnimated(newSettings.displayMode, true);
 
@@ -221,7 +241,6 @@ export class Calendar extends CalendarBase {
     }
 
     [appearanceProperty.setNative](newAppearanceValue: Appearance) {
-        console.dir(newAppearanceValue);
 
         this.nativeView.appearance.weekdayTextColor = new Color(newAppearanceValue.weekdayTextColor).ios;
 

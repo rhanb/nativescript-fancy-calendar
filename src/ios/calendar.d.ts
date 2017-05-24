@@ -25,7 +25,7 @@ export declare class Calendar extends CalendarBase {
     onUnloaded(): void;
     disposeNativeView(): void;
     readonly calendarHeightConstraint: NSLayoutConstraint;
-    setSalendarHeightConstraint(height: number): void;
+    setCalendarHeightConstraint(height: number): void;
     subtitles: Array<CalendarSubtitle>;
     dateSelectedEvent(date: any): void;
     pageChanged(calendar: any): void;
