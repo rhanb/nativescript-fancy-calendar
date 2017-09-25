@@ -5,6 +5,8 @@
 
 NativeScript plugin for [iOS](https://github.com/WenchaoD/FSCalendar) and [Android](https://github.com/prolificinteractive/material-calendarview).
 
+This plugin is not production ready, and there is still a lots of work to do on it. That's why I advise you to use the [nativescript-pro-ui](https://www.npmjs.com/package/nativescript-pro-ui) calendar which is supported by Telerik itself :beers:.
+
 
 ### Screenshots
 
