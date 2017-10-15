@@ -37,7 +37,6 @@ export declare class Calendar extends CalendarBase {
     private _delegate;
     private _dataSource;
     private _calendarHeightConstraint;
-    private _date;
     constructor();
     readonly ios: any;
     onLoaded(): void;

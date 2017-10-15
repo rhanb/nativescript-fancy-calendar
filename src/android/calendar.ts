@@ -26,7 +26,6 @@ const MaterialCalendar = com.prolificinteractive.materialcalendarview,
 
 
 export class Calendar extends CalendarBase {
-    private _date: Date;
 
     public get android() {
         return this.nativeView;
@@ -230,9 +229,5 @@ export class Calendar extends CalendarBase {
 
     public deselectDate(date: Date) {
         this.nativeView.setDateSelected(new MaterialCalendarDay(date.getFullYear(), date.getMonth(), date.getDate()), false);
-    }
-
-    public getDate() {
-        return this._date;
     }
 }

@@ -155,7 +155,6 @@ class CalendarDataSource extends NSObject {
 
 }
 export class Calendar extends CalendarBase {
-    private _date: Date;
     private _subtitles: Array<CalendarSubtitle>;
     private _delegate: CalendarDelegate;
     private _dataSource: CalendarDataSource;
@@ -281,7 +280,6 @@ export class Calendar extends CalendarBase {
             object: this,
             data: date
         });
-        this._date = date;
     }
 
     public dateHasEvent(date): number {
@@ -340,15 +338,10 @@ export class Calendar extends CalendarBase {
             data: bounds
         });
     }
-    public selectDate(date) {
+    public selectDate(date: Date) {
         this.nativeView.selectDate(date);
-        this._date = date;
     }
-    public deselectDate(date) {
+    public deselectDate(date: Date) {
         this.nativeView.deselectDate(date);
-        this._date = null;
-    }
-    public getDate() {
-        return this._date;
     }
 }

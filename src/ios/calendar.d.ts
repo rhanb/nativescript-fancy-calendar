@@ -15,7 +15,6 @@ export declare class CalendarSubtitle {
     text: string;
 }
 export declare class Calendar extends CalendarBase {
-    private _date;
     private _subtitles;
     private _delegate;
     private _dataSource;
@@ -36,7 +35,6 @@ export declare class Calendar extends CalendarBase {
     private isSameDate(dateOne, dateTwo);
     reload(): void;
     displayModeChanged(bounds: any): void;
-    selectDate(date: any): void;
-    deselectDate(date: any): void;
-    getDate(): Date;
+    selectDate(date: Date): void;
+    deselectDate(date: Date): void;
 }

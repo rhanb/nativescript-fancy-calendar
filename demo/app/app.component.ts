@@ -31,6 +31,7 @@ export class AppComponent {
     subtitles: CalendarSubtitle[];
     events: CalendarEvent[];
     public appearance: Appearance;
+    public dateProgrammaticallySelected: boolean;
     private _calendar: Calendar;
     private _layout: any;
 
@@ -211,6 +212,26 @@ export class AppComponent {
 
     public monthChanged(event) {
         console.log('month selected');
+    }
+
+    selectDate() {
+        // select tomorrow
+        let temp = new Date();
+        let tommorow = new Date().getDate() + 1;
+        temp.setDate(tommorow);
+        console.log('select tomorrow : ' + temp);
+        this._calendar.selectDate(temp);
+        this.dateProgrammaticallySelected = true;
+    }
+
+    deselectDate() {
+        // select tomorrow
+        let temp = new Date();
+        let tommorow = new Date().getDate() + 1;
+        temp.setDate(tommorow);
+        console.log('deselect tomorrow');
+        this._calendar.deselectDate(temp);
+        this.dateProgrammaticallySelected = false;
     }
 }
 
