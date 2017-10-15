@@ -11,7 +11,7 @@ import {
 } from 'nativescript-fancy-calendar';
 import { registerElement } from 'nativescript-angular';
 import { Color } from "color";
-import { isIOS } from "platform";
+import { isIOS, isAndroid } from "platform";
 import { AnimationCurve } from "ui/enums";
 
 declare const NSDate, UIView, UIViewAnimationOptions;
@@ -199,6 +199,13 @@ export class AppComponent {
 
     public dateSelected(event) {
         console.log('date selected');
+        let date: Date;
+        if (isIOS) {
+          date = event.data;
+        } else if (isAndroid) {
+          date = event.data.date;
+        }
+        console.log('===> ' + date);
     }
 
 
