@@ -37,6 +37,7 @@ export declare class Calendar extends CalendarBase {
     private _delegate;
     private _dataSource;
     private _calendarHeightConstraint;
+    private _date;
     constructor();
     readonly ios: any;
     onLoaded(): void;
@@ -52,4 +53,7 @@ export declare class Calendar extends CalendarBase {
     private isSameDate(dateOne, dateTwo);
     reload(): void;
     displayModeChanged(bounds: any): void;
+    selectDate(date: any): void;
+    deselectDate(date: any): void;
+    getDate(): any;
 }

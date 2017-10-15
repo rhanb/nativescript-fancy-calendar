@@ -26,6 +26,7 @@ const MaterialCalendar = com.prolificinteractive.materialcalendarview,
 
 
 export class Calendar extends CalendarBase {
+    private _date: Date;
 
     public get android() {
         return this.nativeView;
@@ -55,10 +56,11 @@ export class Calendar extends CalendarBase {
                 return _that.get();
             },
             onDateSelected: function (widget, date, selected) {
+                let dateISO = new Date(date.getYear(), date.getMonth(), date.getDay());
                 this.owner.notify({
                     eventName: NSEvents.dateSelected,
                     object: _that,
-                    data: { date: date, selected: selected }
+                    data: { date: dateISO, selected: selected }
                 });
             }
         });
@@ -70,10 +72,11 @@ export class Calendar extends CalendarBase {
                 return _that.get();
             },
             onMonthChanged: function (widget, date) {
+                let dateISO = new Date(date.getYear(), date.getMonth(), date.getDay());
                 this.owner.notify({
                     eventName: NSEvents.monthChanged,
                     object: _that,
-                    data: date
+                    data: dateISO
                 });
             }
         });
@@ -124,14 +127,18 @@ export class Calendar extends CalendarBase {
             .commit();
 
         let calendarMaxDate = newSettings.maximumDate;
-        this.nativeView.state().edit()
-            .setMaximumDate(new MaterialCalendarDay(calendarMaxDate.getFullYear(), calendarMaxDate.getMonth(), calendarMaxDate.getDate()))
-            .commit();
+        if (calendarMaxDate) {
+            this.nativeView.state().edit()
+                .setMaximumDate(new MaterialCalendarDay(calendarMaxDate.getFullYear(), calendarMaxDate.getMonth(), calendarMaxDate.getDate()))
+                .commit();
+        }
 
         let calendarMinDate = newSettings.minimumDate;
-        this.nativeView.state().edit()
-            .setMinimumDate(new MaterialCalendarDay(calendarMinDate.getFullYear(), calendarMinDate.getMonth(), calendarMinDate.getDate()))
-            .commit();
+        if (calendarMinDate) {
+            this.nativeView.state().edit()
+                .setMinimumDate(new MaterialCalendarDay(calendarMinDate.getFullYear(), calendarMinDate.getMonth(), calendarMinDate.getDate()))
+                .commit();
+        }
     }
 
     [eventsProperty.setNative](newEvents: Array<CalendarEvent>) {
@@ -215,5 +222,17 @@ export class Calendar extends CalendarBase {
 
     private isSameDate(dateOne, dateTwo) {
         return dateOne.getMonth() === dateTwo.getMonth() && dateOne.getDay() === dateTwo.getDate();
+    }
+
+    public selectDate(date: Date) {
+        this.nativeView.setDateSelected(new MaterialCalendarDay(date.getFullYear(), date.getMonth(), date.getDate()), true);
+    }
+
+    public deselectDate(date: Date) {
+        this.nativeView.setDateSelected(new MaterialCalendarDay(date.getFullYear(), date.getMonth(), date.getDate()), false);
+    }
+
+    public getDate() {
+        return this._date;
     }
 }
