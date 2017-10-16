@@ -11,7 +11,7 @@ import {
 } from 'nativescript-fancy-calendar';
 import { registerElement } from 'nativescript-angular';
 import { Color } from "color";
-import { isIOS } from "platform";
+import { isIOS, isAndroid } from "platform";
 import { AnimationCurve } from "ui/enums";
 
 declare const NSDate, UIView, UIViewAnimationOptions;
@@ -31,6 +31,7 @@ export class AppComponent {
     subtitles: CalendarSubtitle[];
     events: CalendarEvent[];
     public appearance: Appearance;
+    public dateProgrammaticallySelected: boolean;
     private _calendar: Calendar;
     private _layout: any;
 
@@ -199,11 +200,38 @@ export class AppComponent {
 
     public dateSelected(event) {
         console.log('date selected');
+        let date: Date;
+        if (isIOS) {
+          date = event.data;
+        } else if (isAndroid) {
+          date = event.data.date;
+        }
+        console.log('===> ' + date);
     }
 
 
     public monthChanged(event) {
         console.log('month selected');
+    }
+
+    selectDate() {
+        // select tomorrow
+        let temp = new Date();
+        let tommorow = new Date().getDate() + 1;
+        temp.setDate(tommorow);
+        console.log('select tomorrow : ' + temp);
+        this._calendar.selectDate(temp);
+        this.dateProgrammaticallySelected = true;
+    }
+
+    deselectDate() {
+        // select tomorrow
+        let temp = new Date();
+        let tommorow = new Date().getDate() + 1;
+        temp.setDate(tommorow);
+        console.log('deselect tomorrow');
+        this._calendar.deselectDate(temp);
+        this.dateProgrammaticallySelected = false;
     }
 }
 

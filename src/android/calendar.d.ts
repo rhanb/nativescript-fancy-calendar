@@ -6,4 +6,6 @@ export declare class Calendar extends CalendarBase {
     private addDecoratorDot(colorValue);
     dateHasEvent(date: any): boolean;
     private isSameDate(dateOne, dateTwo);
+    selectDate(date: Date): void;
+    deselectDate(date: Date): void;
 }

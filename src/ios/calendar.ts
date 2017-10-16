@@ -79,9 +79,9 @@ class CalendarDelegate extends NSObject {
             this._owner.get().dateSelectedEvent(date);
         }
     }
-    public calendarCurrentMonthDidChange(calendar) {
+    public calendarCurrentPageDidChange(calendar) {
         if (this._owner) {
-            this._owner.get().pageChanged(calendar);
+            this._owner.get().pageChanged(calendar, calendar.currentPage);
         }
     }
     public calendarBoundingRectWillChangeAnimated(calendar: any, bounds: CGRect, animated: boolean): void {
@@ -274,11 +274,11 @@ export class Calendar extends CalendarBase {
         });
     }
 
-    public pageChanged(calendar) {
+    public pageChanged(calendar, date) {
         this.notify({
             eventName: NSEvents.monthChanged,
             object: this,
-            data: calendar
+            data: date
         });
     }
 
@@ -337,5 +337,11 @@ export class Calendar extends CalendarBase {
             object: this,
             data: bounds
         });
+    }
+    public selectDate(date: Date) {
+        this.nativeView.selectDate(date);
+    }
+    public deselectDate(date: Date) {
+        this.nativeView.deselectDate(date);
     }
 }

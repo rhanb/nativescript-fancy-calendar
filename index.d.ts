@@ -52,4 +52,7 @@ export declare class Calendar extends CalendarBase {
     private isSameDate(dateOne, dateTwo);
     reload(): void;
     displayModeChanged(bounds: any): void;
+    selectDate(date: any): void;
+    deselectDate(date: any): void;
+    getDate(): any;
 }

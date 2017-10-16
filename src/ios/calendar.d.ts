@@ -28,11 +28,13 @@ export declare class Calendar extends CalendarBase {
     setCalendarHeightConstraint(height: number): void;
     subtitles: Array<CalendarSubtitle>;
     dateSelectedEvent(date: any): void;
-    pageChanged(calendar: any): void;
+    pageChanged(calendar: any, date: any): void;
     dateHasEvent(date: any): number;
     dateHasEventImage(date: any): string;
     dateHasSubtitle(date: any): string;
     private isSameDate(dateOne, dateTwo);
     reload(): void;
     displayModeChanged(bounds: any): void;
+    selectDate(date: Date): void;
+    deselectDate(date: Date): void;
 }
