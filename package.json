@@ -6,8 +6,8 @@
   "typings": "index.d.ts",
   "nativescript": {
     "platforms": {
-      "ios": "3.0.0",
-      "android": "3.0.0"
+      "ios": "3.2.0",
+      "android": "3.2.0"
     }
   },
   "repository": {
@@ -25,11 +25,22 @@
     "Android"
   ],
   "author": {
-    "name": "rhanbIT",
+    "name": "rhanb",
     "email": "aniel.jeanbaptiste@gmail.com"
   },
+  "contributors": [
+    {
+      "name": "rhanb",
+      "email": "aniel.jeanbaptiste@gmail.com"
+    },
+    {
+      "name": "mickaeleuranie",
+      "email": "mickaeleuranie@gmail.com",
+      "url": "http://mickaeleuranie.com"
+    }
+  ],
   "bugs": {
-    "url": "https://github.com/rhanbIT/nativescript-fancy-calendar/issues"
+    "url": "https://github.com/rhanb/nativescript-fancy-calendar/issues"
   },
   "scripts": {
     "build": "tsc",
@@ -42,11 +53,14 @@
     "preparedemo": "npm run build && cd demo && tns plugin remove nativescript-fancy-calendar && tns plugin add .. && tns install",
     "save": "cd demo && TNS_TYPESCRIPT_DECLARATIONS_PATH='$(pwd)/typingz' tns build ios"
   },
-  "homepage": "https://github.com/rhanbIT/nativescript-fancy-calendar",
+  "homepage": "https://github.com/rhanb/nativescript-fancy-calendar",
   "readmeFilename": "README.md",
   "devDependencies": {
-    "tns-core-modules": "^3.0.0",
-    "tns-platform-declarations": "^3.0.1",
-    "typescript": "^2.3.2"
+    "tns-core-modules": "^3.2.0",
+    "tns-platform-declarations": "^3.2.0",
+    "typescript": "^2.5.3"
+  },
+  "peerDependencies": {
+    "tns-core-modules": "^3.2.0"
   }
 }

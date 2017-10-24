@@ -18,8 +18,8 @@ declare const FSCalendar,
     FSCalendarScopeWeek,
     FSCalendarScopeMonth,
     FSCalendarDelegate,
-    FSCalendarDataSource
-CGRectMake;
+    FSCalendarDataSource,
+    CGRectMake;
 
 export enum SCROLL_ORIENTATION {
     "VERTICAL" = FSCalendarScrollDirectionVertical,
