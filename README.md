@@ -89,6 +89,8 @@ export class YourComponent {
     }
 }
 
-``` 
+```
 
+### License
 
+MIT, see [LICENSE](LICENSE).

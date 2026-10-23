@@ -53,6 +53,7 @@
     "preparedemo": "npm run build && cd demo && tns plugin remove nativescript-fancy-calendar && tns plugin add .. && tns install",
     "save": "cd demo && TNS_TYPESCRIPT_DECLARATIONS_PATH='$(pwd)/typingz' tns build ios"
   },
+  "license": "MIT",
   "homepage": "https://github.com/rhanb/nativescript-fancy-calendar",
   "readmeFilename": "README.md",
   "devDependencies": {
